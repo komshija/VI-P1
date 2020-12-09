@@ -21,18 +21,69 @@
 ;prosledjenog stanja problema(igre) odigravanjem poteza
 
 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;; KOD ;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Predstavljanje problema
+;; ili lista listi, ili velika lista
+
+;; ((- - - -) (- - - -) (- - - -) (- - - -) ... (- - - -))
+;; (- - - - - - - - ... - - - -)
+;; Zavisi kolko ima od N, N min 4, reko da napravimo iz za 6
 
 
+;; definisati kako se vraca lista koja je definisana za predstavljanje problema
+;u zavisnosti od N
 
 
+(defun init-stanje (N) 
+  
+  
+  
+  )
 
 
+;; Testiranje kraja igre
+;; treba prebroji ko ima vise od 4 spojena po dijagonale vertikale, horizontale
+;u svim pravcima
+
+(defun krajp (tstanje)
+  
+  
+  )
 
 
+;; treba da pokrene igru, i da namesti ko igra prvi i sve to
+; mozda neka globalna promenjiva..
+;; ko igra prvi uvek je x, ko igra drugi uvek je o
+
+
+(defun start-igra (covek) 
+  
+  
+  )
+
+
+;; treba da prikaze proizvoljno stanje
+
+(defun print-stanje (stanje)
+  
+  
+  )
+
+
+;; proverava da li je potez validan 
+
+(defun validanp (stanje broj-stubica)
+  
+  
+  )
+
+;; omogucava da igrac igra
+
+(defun odigraj (stanje igrac broj-stubica)
+  
+  
+  )
 
