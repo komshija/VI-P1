@@ -39,9 +39,25 @@
 
 (defun init-stanje (N) 
   
-  
+  (setq stanjeigre (init-stanje-pom N (* N N)))
   
   )
+
+(init-stanje 4)
+(init-stanje 6)
+(print stanjeigre)
+
+(defun init-stanje-pom (N pom)
+  (cond 
+   ((equalp 0 pom) '())
+   (t (cons (stubic N) (init-stanje-pom N (1- pom))))
+  )))
+  
+(defun stubic (N)
+  (cond
+   ((equalp 0 N) ())
+   (t (cons '- (stubic (1- N))))
+   ))
 
 
 ;; Testiranje kraja igre
@@ -49,9 +65,15 @@
 ;u svim pravcima
 
 (defun krajp (tstanje)
-  
-  
-  )
+  (cond
+   ((null tstanje) t)
+   ((listp (car tstanje)) (and (krajp (car tstanje)) (krajp (cdr tstanje))))
+   (t (and (not (equalp (car tstanje) '-)) (krajp (cdr tstanje))))
+   ))
+
+
+(krajp '((O O X X) (X O X X))); => T
+(krajp '((O O X X) (X O - X))); => NIL
 
 
 ;; treba da pokrene igru, i da namesti ko igra prvi i sve to
