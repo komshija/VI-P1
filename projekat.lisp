@@ -99,13 +99,33 @@
 
 (defun validanp (stanje broj-stubica)
   
-  
+  (cond
+   ((null broj-stubica) '())
+   ((> broj-stubica (expt 4 2)) '())
+   ((< broj-stubica 0) '())
+   (t (stubicp (nth broj-stubica stanje)))
+   )
   )
+
+(defun stubicp(lista)
+  (cond
+   ((null lista) '())
+   ((equalp (car lista) '-) t)
+   (t (OR '() (stubicp (cdr lista))))
+   )
+  )
+
+
+(validanp '((x o x o) (x x x x) (x - - -)) 2)
+(validanp '((x o x o) (x x x x) (x - - -)) 1)
 
 ;; omogucava da igrac igra
 
 (defun odigraj (stanje igrac broj-stubica)
-  
+
   
   )
+
+
+  
 
