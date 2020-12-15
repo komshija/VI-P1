@@ -101,8 +101,8 @@
   
   (cond
    ((null broj-stubica) '())
-   ((> broj-stubica (expt 4 2)) '())
-   ((< broj-stubica 0) '())
+   ((> broj-stubica (expt 4 2)) '());pretpostavka da je N=4 jer ga nemam kao parametar
+   ((< broj-stubica 0) '())         ;sad ne znam da l ce bude globalno il kako, ce resimo
    (t (stubicp (nth broj-stubica stanje)))
    )
   )
@@ -123,9 +123,26 @@
 
 (defun odigraj (stanje igrac broj-stubica)
 
-  
+  (cond
+   ((validanp stanje broj-stubica) (izmeni stanje igrac broj-stubica))
+   (t stanje)
+   )
   )
 
+(defun izmeni (stanje igrac broj-stubica)
+  (cond
+   ((= 0 broj-stubica) (cons (dodaj (car stanje) igrac) (cdr stanje)))
+   (t (cons (car stanje) (izmeni (cdr stanje) igrac (- broj-stubica 1))))
+   )
+  )
 
-  
+(defun dodaj (stubic igrac)
+  (cond
+   ((equalp (car stubic) '-) (cons igrac (cdr stubic)))
+   (t (cons (car stubic) (dodaj (cdr stubic) igrac)))
+   )
+  )
 
+(odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'o 1)
+
+(odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'o 3)
