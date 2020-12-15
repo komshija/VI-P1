@@ -89,7 +89,7 @@
 
 (defun start-igra ()
   (let* 
-      ((prvi (progn (format t "unesite da li covek igra prvi ['t / ()]") (read)))
+      ((prvi (progn (format t "unesite da li covek igra prvi ['t / ()] : ") (read)))
        (N (unesite-N)))
     (init-stanje N)
     
@@ -99,7 +99,7 @@
 
 (defun unesite-N () 
   (let* 
-      ((N (progn (format t "unesite koliko je velika tabla [paran broj; min 4]") (read) )))
+      ((N (progn (format t "unesite koliko je velika tabla [paran broj; min 4] : ") (read) )))
     (cond 
      ((equalp 1 (mod N 2)) (unesite-N))
      ((< N 4) (unesite-N))
@@ -164,8 +164,8 @@
   
   (cond
    ((null broj-stubica) '())
-   ((> broj-stubica (expt 4 2)) '());pretpostavka da je N=4 jer ga nemam kao parametar
-   ((< broj-stubica 0) '())         ;sad ne znam da l ce bude globalno il kako, ce resimo
+   ((> broj-stubica Nstubica) '())
+   ((< broj-stubica 0) '())
    (t (stubicp (nth broj-stubica stanje)))
    )
   )
@@ -209,4 +209,4 @@
   )
 
 (odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'x 13)
-(odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'o 3)
+(odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'o 2)
