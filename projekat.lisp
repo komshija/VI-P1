@@ -32,20 +32,18 @@
 ;; (- - - - - - - - ... - - - -)
 ;; Zavisi kolko ima od N, N min 4, reko da napravimo iz za 6
 
+;;;;; =========================================================================== ;;;;;
+
 
 ;; definisati kako se vraca lista koja je definisana za predstavljanje problema
 ;u zavisnosti od N
 
 
-(defun init-stanje (N) 
-  
-  (setq stanjeigre (init-stanje-pom N (* N N)))
-  
-  )
-
-(init-stanje 4)
-(init-stanje 6)
-(print stanjeigre)
+(defun init-stanje (N)
+  (let () 
+    (setq Nstubica (* N N))
+    (setq stanjeigre (init-stanje-pom N (* N N)))
+    ))
 
 (defun init-stanje-pom (N pom)
   (cond 
@@ -58,6 +56,12 @@
    ((equalp 0 N) ())
    (t (cons '- (stubic (1- N))))
    ))
+
+(init-stanje 4)
+(init-stanje 6)
+(print stanjeigre)
+
+;;;;; =========================================================================== ;;;;;
 
 
 ;; Testiranje kraja igre
@@ -76,23 +80,82 @@
 (krajp '((O O X X) (X O - X))); => NIL
 
 
-;; treba da pokrene igru, i da namesti ko igra prvi i sve to
-; mozda neka globalna promenjiva..
+;;;;; =========================================================================== ;;;;;
+
+
+;; treba da pokrene igru, i da namesti ko igra prvi
 ;; ko igra prvi uvek je x, ko igra drugi uvek je o
 
 
-(defun start-igra (covek) 
-  
-  
-  )
+(defun start-igra ()
+  (let* 
+      ((prvi (progn (format t "unesite da li covek igra prvi ['t / ()]") (read)))
+       (N (unesite-N)))
+    (init-stanje N)
+    
+  ))
+
+
+
+(defun unesite-N () 
+  (let* 
+      ((N (progn (format t "unesite koliko je velika tabla [paran broj; min 4]") (read) )))
+    (cond 
+     ((equalp 1 (mod N 2)) (unesite-N))
+     ((< N 4) (unesite-N))
+     (t N))))
+
+(unesite-N)
+
+;;;;; =========================================================================== ;;;;;
 
 
 ;; treba da prikaze proizvoljno stanje
 
-(defun print-stanje (stanje)
-  
-  
+;postavlja string kao pomoc za print
+(setq chars-print "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+;sklanja sa potez sa vrha
+(defun remove-top (tstanje)
+  (mapcar #'reverse (mapcar #'cdr (mapcar #'reverse tstanje))))
+
+;vraca potez sa vrha
+(defun get-top (tstanje)
+  (mapcar #'car (mapcar #'reverse tstanje))
   )
+
+(remove-top '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)))
+(get-top '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)))
+
+
+(defun get-support-chars (N)
+  (cond 
+   ((equalp 0 N) ())
+   (t (append (get-support-chars (1- N)) (list (char chars-print (1- N)))))))
+
+
+(format t "~%~A" (get-support-chars 16))
+
+
+(defun print-stanje (tstanje N)
+  (cond 
+   ((null (caar tstanje)) (format t "~%~A" (get-support-chars N)))
+   (t (let 
+          ((pstanje (get-top tstanje)) 
+           (sstanje (remove-top tstanje)))
+        (format t "~%~A" pstanje)
+        (print-stanje sstanje N)
+          ))
+  ))
+
+
+
+(print-stanje stanjeigre Nstubica)
+
+(print-stanje '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 6)
+
+
+;;;;; =========================================================================== ;;;;;
 
 
 ;; proverava da li je potez validan 
@@ -119,6 +182,8 @@
 (validanp '((x o x o) (x x x x) (x - - -)) 2)
 (validanp '((x o x o) (x x x x) (x - - -)) 1)
 
+;;;;; =========================================================================== ;;;;;
+
 ;; omogucava da igrac igra
 
 (defun odigraj (stanje igrac broj-stubica)
@@ -143,6 +208,5 @@
    )
   )
 
-(odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'o 1)
-
+(odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'x 13)
 (odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'o 3)
