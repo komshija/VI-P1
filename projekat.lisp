@@ -139,33 +139,29 @@
 (format t "~%~A" (get-support-chars 16))
 
 
-(defun ubaci (lista el offset pom)
-  (cond
-   ((null el) '())
-   ((equalp offset pom) (cons (car el) (ubaci (cdr lista) (cdr el) offset 0)))
-   (t (cons (car lista) (ubaci (cdr lista) el offset (1+ pom))))
-   ))
-
-;radi
-;(print (ubaci '(- - - - - - - - - - - - - - - -) '(1 2 3 4) 3 0))
-
 (defun space-list (N)
   (cond 
    ((equalp 0 N) ())
    (t (cons '#\Space (space-list (1- N))))
    ))
 
-;radi
-;(format t "~A" (ubaci (space-list 16) '(1 2 3 4) 3 0))
 
 
 
-
+(defun space-stanje (lista n)
+  (cond
+   ((null lista) '())
+   (t (cons 
+       (append (space-list n) 
+               (car lista) 
+               (space-list (- (- (sqrt Nstubica) 1) n)))
+       (space-stanje (cdr lista) (mod (1+ n) (sqrt Nstubica))))
+   )))
 
 
 (defun print-stanje (tstanje N)
   (cond 
-   ((null (caar tstanje)) (format t "~%~A" (get-support-chars N)))
+   ((null (caar tstanje)) ())
    (t (let 
           ((pstanje (get-top tstanje)) 
            (sstanje (remove-top tstanje)))
@@ -175,8 +171,16 @@
   ))
 
 
+(defun print-glavna (tstanje N)
+  (let ()
+    (format t "~%~A" (get-support-chars N))
+    (print-stanje tstanje N)
+    (format t "~%~A" (get-support-chars N))
+    ))
 
-(print-stanje stanjeigre Nstubica)
+
+
+(print-glavna (space-stanje stanjeigre 0) Nstubica)
 
 (print-stanje '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 6)
 
