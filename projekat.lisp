@@ -121,20 +121,46 @@
 
 ;vraca potez sa vrha
 (defun get-top (tstanje)
-  (mapcar #'car (mapcar #'reverse tstanje))
-  )
+  (mapcar #'car (mapcar #'reverse tstanje)))
 
 (remove-top '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)))
-(get-top '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)))
+(get-top '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -) (x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -) (x x x x) (x - - -) (x o - -) (x x x -)))
+
 
 
 (defun get-support-chars (N)
   (cond 
    ((equalp 0 N) ())
    (t (append (get-support-chars (1- N)) (list (char chars-print (1- N)))))))
+(char chars-print 3)
+
 
 
 (format t "~%~A" (get-support-chars 16))
+
+
+(defun ubaci (lista el offset pom)
+  (cond
+   ((null el) '())
+   ((equalp offset pom) (cons (car el) (ubaci (cdr lista) (cdr el) offset 0)))
+   (t (cons (car lista) (ubaci (cdr lista) el offset (1+ pom))))
+   ))
+
+;radi
+;(print (ubaci '(- - - - - - - - - - - - - - - -) '(1 2 3 4) 3 0))
+
+(defun space-list (N)
+  (cond 
+   ((equalp 0 N) ())
+   (t (cons '#\Space (space-list (1- N))))
+   ))
+
+;radi
+;(format t "~A" (ubaci (space-list 16) '(1 2 3 4) 3 0))
+
+
+
+
 
 
 (defun print-stanje (tstanje N)
@@ -170,7 +196,7 @@
    )
   )
 
-(defun stubicp(lista)
+(defun stubicp (lista)
   (cond
    ((null lista) '())
    ((equalp (car lista) '-) t)
