@@ -76,7 +76,7 @@
 ;; Globalne promenjive
 ; Nstubica : ukupan broj stubica
 ; stanjeigre : trenutno realno stanje igre
-
+; prvi-igrac : igrac koji igra prvi
 ;;;;; =========================================================================== ;;;;;
 
 
@@ -153,10 +153,10 @@
 ;
 (defun start-igra ()
   (let* 
-      ((prvi (progn (format t "unesite da li covek igra prvi ['t / ()] : ") (read)))
+      ((prvi (progn (format t "~%Unesite da li covek igra prvi ['t / ()] : ") (read)))
        (N (unesite-N)))
     (init-stanje N)
-    
+    (setq prvi-igrac prvi)
   ))
 
 ;Unos velicine table tj visine stubica
@@ -164,7 +164,7 @@
 ;
 (defun unesite-N () 
   (let* 
-      ((N (progn (format t "unesite koliko je velika tabla [paran broj; min 4] : ") (read) )))
+      ((N (progn (format t "~%Unesite koliko je velika tabla [paran broj; min 4] : ") (read) )))
     (cond 
      ((equalp 1 (mod N 2)) (unesite-N))
      ((< N 4) (unesite-N))
@@ -182,7 +182,7 @@
 
 ;;Postavlja string kao pomoc za print
 ; Sluzi pri generisanju pomocnih linija pri prikazu
-(setq chars-print "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+(setq chars-print '(0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z))
 
 ;;Sklanja sve potez sa vrha svakog stubica
 ;Params:
@@ -202,7 +202,7 @@
 (defun get-support-chars (N)
   (cond 
    ((equalp 0 N) ())
-   (t (append (get-support-chars (1- N)) (list (char chars-print (1- N)))))))
+   (t (append (get-support-chars (1- N)) (list (nth (1- N) chars-print))))))
 
 
 ;; Vraca listu sa spejs karakterima
@@ -264,7 +264,7 @@
 ;(get-top '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -) (x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -) (x x x x) (x - - -) (x o - -) (x x x -)))
 ;(print-stanje '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 6)
 
-;(print-glavna stanjeigre)
+(print-glavna stanjeigre)
 
 
 ;;;;; =========================================================================== ;;;;;
@@ -335,4 +335,32 @@
 ;(odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'x 13)
 ;(odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'o 2)
 
-(print "Ucitano")
+;;;;; =========================================================================== ;;;;;
+
+;; Rekuzivna petlja za igranje igre
+;;Params
+; igrac : x / o
+; tstanje : trenutno stanje igre
+
+(defun potez (igrac tstanje)
+  (cond 
+    ((krajp tstanje) (format t "~%Kraj igre.. Racunam pobednika..")) ;; testira na kraj, => raucna pobednika ako je kraj
+
+    (t (let* 
+          ((temp (print-glavna tstanje)) ;;stampa
+          (odigran-stubic (progn (format t "~%Unesite stubic koji hocete da odigrate [ ~A ] :" igrac ) (read))));;unos poteza
+    (cond 
+      ((validanp tstanje odigran-stubic)  (potez (if (equalp igrac 'x) 'o 'x) (odigraj tstanje igrac odigran-stubic)));; igra sledeci
+      (t (potez igrac tstanje));; igra opet, potez nevalidan
+    )))))
+
+;; funkcija koja pokrece celu igru
+;Params
+;
+(defun igraj-connect-four () 
+  (let* ()
+    (start-igra)  
+    (potez 'x stanjeigre)))
+
+
+(igraj-connect-four)
