@@ -367,7 +367,7 @@
     (potez 'x tstanje)))
 
 
- (igraj-connect-four)
+; (igraj-connect-four)
 
 ;;;;; =========================================================================== ;;;;;
 
@@ -376,7 +376,7 @@
 ;tstanje : trenutno stanje
 ;igrac : x/o
 (defun vrati-moguca-stanja (tstanje igrac)
-  (format t "~A"  (moguca-stanja tstanje igrac 0 NStubica))
+  (format t "~A"  (moguca-stanja tstanje igrac 0 NStubica)))
 
 ;;Pomocna funkcija koja igra potez od 0 do ukupnoStubica, tj igra virtuelene poteze
 
@@ -386,7 +386,7 @@
     (t (cons (odigraj tstanje igrac brStubic) (moguca-stanja tstanje igrac (1+ brStubic) ukupnoStubica)))
   ))
 
-(format t "~A" (vrati-moguca-stanja (init-stanje 4) 'X))
+;(format t "~A" (vrati-moguca-stanja (init-stanje 4) 'X))
 
 ;;;;; =========================================================================== ;;;;;
 
@@ -396,7 +396,9 @@
   (let* 
     ((X-spojene (+ (prebroj-horizonatalne tstanje 'X) (prebroj-vertikalne tstanje 'X) (prebroj-dijagonalne tstanje 'X)))
       (O-spojene (+ (prebroj-horizonatalne tstanje 'O) (prebroj-vertikalne tstanje 'O) (prebroj-dijagonalne tstanje 'O))))
-    (cond ((> X-spojene O-spojene) (format t "Pobednik je X."))
+    (cond 
+      ((equalp X-spojene O-spojene) (format t "Nereseno!"))
+      ((> X-spojene O-spojene) (format t "Pobednik je X."))
       (t (format t "Pobednik je O.")))))
 
 ;; Funkcija koja broji 4 ponavljanja karaktera u listi
@@ -412,15 +414,21 @@
     (t (prebroj-cetri (cdr lista) karakter 0))))
 
 
+;(prebroj-cetri '(X X X X) 'X 0)
+
+
 ;; Broji vertikalno na stubicima koliko ima spojenih 
 ;;Params
 ;tstanje : trenutno stanje
 ;igrac : igrac za kog se broji
 
-(defun prebroj-vertikalne (tstanje igrac) 
+(defun prebroj-formatiranu-listu (tstanje igrac) 
   (cond
     ((null tstanje) 0)
-    (t (+ (prebroji-cetri (car tstanje) igrac) (prebroj-vertikalne (cdr tstanje) igrac)))))
+    (t (+ (prebroj-cetri (car tstanje) igrac 0) (prebroj-vertikalne (cdr tstanje) igrac)))))
+
+(defun prebroj-vertikalne (tstanje igrac)
+  (prebroj-formatiranu-listu tstanje igrac))
 
 
 ;; Transformise listu iz N*N atoma u N listi od N atoma
@@ -428,38 +436,62 @@
 ;lista : lista koja se transformisa
 ;N : 'stranica' 
 
-;; OVO NE RADI JOS
-;; OVO NE RADI JOS
-;; OVO NE RADI JOS
-;; OVO NE RADI JOS
-;; OVO NE RADI JOS
-
 (defun transformisi (lista N)
   (cond 
-    ((equalp (length lista) (* N N)) '())  
-    (t (transformisi-tops lista N 0))
-    ))
+    ((not (equalp (length lista) (* N N))) '())
+    (t (transformisi-tops lista N '()))
+))
 
-;; OVO NE RADI JOS
-;; OVO NE RADI JOS
-;; OVO NE RADI JOS
-;; OVO NE RADI JOS
-;; OVO NE RADI JOS
-
+;; Zvati preko tranformisi, vise je enkapsulirano
 (defun transformisi-tops (lista N pom) 
   (cond   
-    ((null lista) '())
-    ((equalp pom N) (cons (car lista) (transformisi-tops (cdr lista) N 0)))
-    (t (transformisi-tops (cons (append (car lista) (cadr lista)) (cddr lista)) N (1+ pom)))))
+    ((null lista) (list pom))
+    ((equalp N (length pom)) (cons pom (transformisi-tops (cdr lista) N (list (car lista)))))
+    (t (transformisi-tops (cdr lista) N (cons (car lista) pom)))
+  ))
+
+;(transformisi-tops (get-top (init-stanje 6)) 6 '())
+
+
+(defun transponuj (lista)
+  (cond
+    ((null (caar lista)) ())
+    (t (cons (get-top lista) (transponuj (remove-top lista))))
+  ))
+
+;(transponuj '((x o x o) (x x x x) (o x x o) (x o x o)))
 
 
 ;; Broji horizonatalno na stubicima koliko ima spojenih 
 ;;Params
 ;tstanje : trenutno stanje
 ;igrac : igrac za kog se broji
-(defun prebroj-horizonatalne (tstanje igrac) 
 
-)
+;;; NISAM SIGURAN 1000% dal je ovo ispravno, tj dal radi ispravno, za neke proste slucajeve moze da se kaze da vraca tacno
+
+(defun prebroj-horizonatalne (tstanje igrac) 
+  (cond 
+   ((null (caar tstanje)) 0)
+   (t (let 
+          ((pstanje (transformisi (get-top tstanje) 4)) ;; za sad zovem za 4 
+           (sstanje (remove-top tstanje)))
+          (+ 
+            (prebroj-formatiranu-listu pstanje igrac)
+            (prebroj-formatiranu-listu (transponuj pstanje) igrac)
+            (prebroj-horizonatalne sstanje igrac)
+          )
+   ))))
+
+
+;;(print-glavna '((x o x o) (x x x x) (o x x o) (x o x o) (x o x o) (x x x x) (o x x o) (x o x o) (x o x o) (x x x x) (o x x o) (x o x o) (x o x o) (x x x x) (o x x o) (x o x o)))
+
+;; (prebroj-horizonatalne '((x o x o) (x o x o) (x o x o) (x o x o) 
+;;                          (x o x o) (x o x o) (x o x o) (x o x o) 
+;;                          (x o x o) (x o x o) (x o x o) (x o x o) 
+;;                          (x o x o) (x o x o) (x o x o) (x o x o)) 'X)
+
+                         ;;expected 16, actual 16
+
 
 ;; Broji dijagonalno na stubicima koliko ima spojenih 
 ;;Params
@@ -467,8 +499,6 @@
 ;igrac : igrac za kog se broji
 
 (defun prebroj-dijagonalne (tstanje igrac) 
-
+  (+ 0 0)
 )
 
-
-;(prebroj-cetri '(O O O O O X X X O X X X O O O O) 'O 0)
