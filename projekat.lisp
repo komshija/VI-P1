@@ -15,13 +15,13 @@
 
 ;; Prva faza ;;
 
-;;;; Definisati nacin predstavljanja stanja problema (igre)
-;;;; Napisati funkciju za postavljanje pocetnog stanja na osnovu zadate velicine kocke
-;;;; Napisati funkcije za testiranje kraja igre
-;;;; Omoguciti izbor ko ce da igra prvi (covek ili racunar)
-;;;; Prvi igra uvek Igrac X, a drugi O
-;;;; Implementirati funkcije koje obezbedjuju prikaz proizvoljnog stanja problema(igre)
-;;;; Realizovati funkcije koje na osnovu zadatog poteza, u obliku broj_stubica ili
+;;;; [x] Definisati nacin predstavljanja stanja problema (igre)
+;;;; [x] Napisati funkciju za postavljanje pocetnog stanja na osnovu zadate velicine kocke
+;;;; [x] Napisati funkcije za testiranje kraja igre
+;;;; [x] Omoguciti izbor ko ce da igra prvi (covek ili racunar)
+;;;; [x] Prvi igra uvek Igrac X, a drugi O
+;;;; [x] Implementirati funkcije koje obezbedjuju prikaz proizvoljnog stanja problema(igre)
+;;;; [x] Realizovati funkcije koje na osnovu zadatog poteza, u obliku broj_stubica ili
 ;(vrsta, kolona), omogucavaju: proveru da li je potez valjan, ako jeste, promenu 
 ;prosledjenog stanja problema(igre) odigravanjem poteza
 
@@ -34,15 +34,17 @@
 ;; zadatog (validnog) poteza formira novu situaciju na kocki (stanje).
 ;; Ne menjati postojeće stanje već napraviti novo i na njemu odigrati potez.
 
-;;;; Na osnovu trenutne (proizvoljne) situacije u kocki (stanja) i
-;;  igrača koji je na potezu formira listu svih mogućih situacija u kocki (stanja),
-;; korišćenjem funkcije iz prethodne tačkeRealizovati funkcije 
-;; koje obezbeđuju odigravanje partije između dva igrača (dva čoveka, ne računara i čoveka)
-;;  * unos poteza i provera da li je potez moguć
-;;  *ukoliko nije moguć zahtevati unos novog poteza
-;;  *ukoliko je moguć odigrati ga i promeniti trenutno stanje
-;;  *prikazati novonastalo stanje sistema
-;;  *proveru kraja i određivanje pobednika u igri
+;;;; [x] Na osnovu trenutne (proizvoljne) situacije u kocki (stanja) i
+;; igrača koji je na potezu formira listu svih mogućih situacija u kocki (stanja),
+;; korišćenjem funkcije iz prethodne tačke.
+
+;; Realizovati funkcije [x]
+;; [x] koje obezbeđuju odigravanje partije između dva igrača (dva čoveka, ne računara i čoveka)
+;; [x] * unos poteza i provera da li je potez moguć
+;; [x] *ukoliko nije moguć zahtevati unos novog poteza
+;; [x] *ukoliko je moguć odigrati ga i promeniti trenutno stanje
+;; [x] *prikazati novonastalo stanje sistema
+;; *proveru kraja i određivanje pobednika u igri
 
 ;; Treca faza ;;
 
@@ -75,7 +77,6 @@
 
 ;; Globalne promenjive
 ; Nstubica : ukupan broj stubica
-; stanjeigre : trenutno realno stanje igre
 ; prvi-igrac : igrac koji igra prvi
 ;;;;; =========================================================================== ;;;;;
 
@@ -89,7 +90,7 @@
 (defun init-stanje (N)
   (let () 
     (setq Nstubica (* N N))
-    (setq stanjeigre (init-stanje-pom (* N N)))
+    (init-stanje-pom (* N N))
     ))
 
 ;; Funkcija koja spaja sve stubice u jednu listu
@@ -114,7 +115,7 @@
 
 
 ;; Test primeri
-;(init-stanje 4)
+(init-stanje 4)
 ;(init-stanje 6)
 
 
@@ -155,8 +156,8 @@
   (let* 
       ((prvi (progn (format t "~%Unesite da li covek igra prvi ['t / ()] : ") (read)))
        (N (unesite-N)))
-    (init-stanje N)
     (setq prvi-igrac prvi)
+    (init-stanje N)
   ))
 
 ;Unos velicine table tj visine stubica
@@ -264,7 +265,7 @@
 ;(get-top '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -) (x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -) (x x x x) (x - - -) (x o - -) (x x x -)))
 ;(print-stanje '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 6)
 
-(print-glavna stanjeigre)
+;(print-glavna stanjeigre)
 
 
 ;;;;; =========================================================================== ;;;;;
@@ -344,23 +345,130 @@
 
 (defun potez (igrac tstanje)
   (cond 
-    ((krajp tstanje) (format t "~%Kraj igre.. Racunam pobednika..")) ;; testira na kraj, => raucna pobednika ako je kraj
+    ((krajp tstanje) 
+      (let* ()
+        (format t "~%Kraj igre.. Racunam pobednika..~%")
+        (vrati-pobednika tstanje)
+      )
+    
+    ) ;; testira na kraj, => raucna pobednika ako je kraj
 
-    (t (let* 
-          ((temp (print-glavna tstanje)) ;;stampa
+    (t (let* ((temp (print-glavna tstanje)) ;;stampa
           (odigran-stubic (progn (format t "~%Unesite stubic koji hocete da odigrate [ ~A ] :" igrac ) (read))));;unos poteza
-    (cond 
-      ((validanp tstanje odigran-stubic)  (potez (if (equalp igrac 'x) 'o 'x) (odigraj tstanje igrac odigran-stubic)));; igra sledeci
-      (t (potez igrac tstanje));; igra opet, potez nevalidan
-    )))))
+    (cond ((validanp tstanje odigran-stubic)  (potez (if (equalp igrac 'x) 'o 'x) (odigraj tstanje igrac odigran-stubic)));; igra sledeci
+      (t (potez igrac tstanje)))))));; igra opet, potez nevalidan
+   
 
-;; funkcija koja pokrece celu igru
+;; Funkcija koja pokrece celu igru
 ;Params
 ;
 (defun igraj-connect-four () 
-  (let* ()
-    (start-igra)  
-    (potez 'x stanjeigre)))
+  (let* ((tstanje (start-igra)))
+    (potez 'x tstanje)))
 
 
-(igraj-connect-four)
+ (igraj-connect-four)
+
+;;;;; =========================================================================== ;;;;;
+
+;;Funkcija koja generise sva stanja za trenutno stnaje i igraca koji je prosledjen
+;Params
+;tstanje : trenutno stanje
+;igrac : x/o
+(defun vrati-moguca-stanja (tstanje igrac)
+  (format t "~A"  (moguca-stanja tstanje igrac 0 NStubica))
+
+;;Pomocna funkcija koja igra potez od 0 do ukupnoStubica, tj igra virtuelene poteze
+
+(defun moguca-stanja (tstanje igrac brStubic ukupnoStubica)
+  (cond
+    ((equalp ukupnoStubica brStubic) '())
+    (t (cons (odigraj tstanje igrac brStubic) (moguca-stanja tstanje igrac (1+ brStubic) ukupnoStubica)))
+  ))
+
+(format t "~A" (vrati-moguca-stanja (init-stanje 4) 'X))
+
+;;;;; =========================================================================== ;;;;;
+
+;; Funkcija koja stampa ko je pobednik
+
+(defun vrati-pobednika (tstanje)
+  (let* 
+    ((X-spojene (+ (prebroj-horizonatalne tstanje 'X) (prebroj-vertikalne tstanje 'X) (prebroj-dijagonalne tstanje 'X)))
+      (O-spojene (+ (prebroj-horizonatalne tstanje 'O) (prebroj-vertikalne tstanje 'O) (prebroj-dijagonalne tstanje 'O))))
+    (cond ((> X-spojene O-spojene) (format t "Pobednik je X."))
+      (t (format t "Pobednik je O.")))))
+
+;; Funkcija koja broji 4 ponavljanja karaktera u listi
+;;Params
+;lista : lista koja se prosledjuje
+;karakter : karakter koji se broji
+;br : 0
+(defun prebroj-cetri (lista karakter br)
+  (cond 
+    ((null lista) 0)
+    ((and (equalp br 3) (equalp karakter (car lista))) (1+ (prebroj-cetri (cdr lista) karakter br)))
+    ((equalp karakter (car lista)) (prebroj-cetri (cdr lista) karakter (1+ br)))
+    (t (prebroj-cetri (cdr lista) karakter 0))))
+
+
+;; Broji vertikalno na stubicima koliko ima spojenih 
+;;Params
+;tstanje : trenutno stanje
+;igrac : igrac za kog se broji
+
+(defun prebroj-vertikalne (tstanje igrac) 
+  (cond
+    ((null tstanje) 0)
+    (t (+ (prebroji-cetri (car tstanje) igrac) (prebroj-vertikalne (cdr tstanje) igrac)))))
+
+
+;; Transformise listu iz N*N atoma u N listi od N atoma
+;;Params
+;lista : lista koja se transformisa
+;N : 'stranica' 
+
+;; OVO NE RADI JOS
+;; OVO NE RADI JOS
+;; OVO NE RADI JOS
+;; OVO NE RADI JOS
+;; OVO NE RADI JOS
+
+(defun transformisi (lista N)
+  (cond 
+    ((equalp (length lista) (* N N)) '())  
+    (t (transformisi-tops lista N 0))
+    ))
+
+;; OVO NE RADI JOS
+;; OVO NE RADI JOS
+;; OVO NE RADI JOS
+;; OVO NE RADI JOS
+;; OVO NE RADI JOS
+
+(defun transformisi-tops (lista N pom) 
+  (cond   
+    ((null lista) '())
+    ((equalp pom N) (cons (car lista) (transformisi-tops (cdr lista) N 0)))
+    (t (transformisi-tops (cons (append (car lista) (cadr lista)) (cddr lista)) N (1+ pom)))))
+
+
+;; Broji horizonatalno na stubicima koliko ima spojenih 
+;;Params
+;tstanje : trenutno stanje
+;igrac : igrac za kog se broji
+(defun prebroj-horizonatalne (tstanje igrac) 
+
+)
+
+;; Broji dijagonalno na stubicima koliko ima spojenih 
+;;Params
+;tstanje : trenutno stanje
+;igrac : igrac za kog se broji
+
+(defun prebroj-dijagonalne (tstanje igrac) 
+
+)
+
+
+;(prebroj-cetri '(O O O O O X X X O X X X O O O O) 'O 0)
