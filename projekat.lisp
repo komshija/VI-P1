@@ -333,6 +333,8 @@
 ;;Test:
 ;(igraj-connect-four)
 
+
+;; Funkcija koja generise stanja u koja se moze doci na osnovu proizvoljnog stanja
 ;Params
 ;tstanje : trenutno stanje
 ;igrac : x/o
