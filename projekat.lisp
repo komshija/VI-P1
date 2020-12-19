@@ -382,16 +382,16 @@
 ;(prebroj-cetri '(X X X X) 'X 0)
 
 
-;; Broji vertikalno na stubicima koliko ima spojenih 
-;;Params
-;tstanje : trenutno stanje
-;igrac : igrac za kog se broji
 
 (defun prebroj-formatiranu-listu (tstanje igrac) 
   (cond
     ((null tstanje) 0)
-    (t (+ (prebroj-cetri (car tstanje) igrac 0) (prebroj-vertikalne (cdr tstanje) igrac)))))
+    (t (+ (prebroj-cetri (car tstanje) igrac 0) (prebroj-formatiranu-listu (cdr tstanje) igrac)))))
 
+;; Broji vertikalno na stubicima koliko ima spojenih 
+;;Params
+;tstanje : trenutno stanje
+;igrac : igrac za kog se broji
 (defun prebroj-vertikalne (tstanje igrac)
   (prebroj-formatiranu-listu tstanje igrac))
 
