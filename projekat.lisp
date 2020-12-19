@@ -2,13 +2,18 @@
 ;;;;;;;;;;;;;; KOD ;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;=====================================================================================================================;
+;===================================================== PRVA FAZA =====================================================;
+;=====================================================================================================================;
+
 ;; Globalne promenjive
 ; Nstubica : ukupan broj stubica
 ; prvi-igrac : igrac koji igra prvi
 ;;;;; =========================================================================== ;;;;;
 
 
-;; 1. Definisati kako se vraca lista koja je definisana za predstavljanje problema u zavisnosti od N
+;; 1. Definisati nacin za predstavljanje stanja problema i 
+;;    napisati funkciju za postavljanje pocetnog stanja na osnovu zadate velicine kocke
 
 ;; Funkcija koja inicijalizuje stanje i ukuban broj stubica
 ;Param: 
@@ -49,7 +54,7 @@
 ;;;;; =========================================================================== ;;;;;
 
 
-;; 2. Testiranje kraja igre
+;; 2. Napisati funkcije za testiranje kraja igre
 
 ;; Proverava da li je cela tabla popunjena
 ;Params:
@@ -71,12 +76,12 @@
 ;;;;; =========================================================================== ;;;;;
 
 
-;; 3. Treba da pokrene igru, i da namesti ko igra prvi
-;; ko igra prvi uvek je x, ko igra drugi uvek je o
+;; 3. Omoguciti izbor ko ce igrati prvi (covek ili racunar)
+;; Prvi igra uvek igrac X, a drugi igrac O
 
 
 ;; Pokrece igru, korisnik bira ko igra prvi, 
-;takodje bira velicinu table sve dok ne unese kako treba
+;takodje bira velicinu table sve dok ne unese validnu vrednost
 ;Params:
 ;
 (defun start-igra ()
@@ -103,17 +108,18 @@
 ;(start-igra)
 ;(unesite-N)
 
+
 ;;;;; =========================================================================== ;;;;;
 
 
-;; 4. Treba da prikaze proizvoljno stanje
+;; 4. Implementirati funkcije koje obezbedjuju prikaz proizvoljnog stanja problema (igre)
 
 ;;Postavlja string kao pomoc za print
 ; Sluzi pri generisanju pomocnih linija pri prikazu
 
 (setq chars-print "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-;;Sklanja sve potez sa vrha svakog stubica
+;;Sklanja sve poteze sa vrha svakog stubica
 ;Params:
 ;tstanje : trenutno stanje igre
 (defun remove-top (tstanje)
@@ -141,7 +147,7 @@
    (t (append (get-support-chars (1- N)) (list (char chars-print (1- N)))))))
 
 
-;; Vraca listu sa spejs karakterima
+;; Vraca listu sa blanko karakterima
 ;Params
 ;N : duzina liste koja ce biti generisana
 
@@ -151,7 +157,7 @@
    (t (cons '#\Space (space-list (1- N))))
    ))
 
-;; Pretvara stubic u stanje sa spejsovima, pogodno za print
+;; Pretvara stubic u stanje sa blanko znakovima, pogodno za print
 ;Params
 ;lista : proizvoljno stanje u igri
 ;n : pomocna !!! Pozvati sa 0
@@ -206,7 +212,9 @@
 ;;;;; =========================================================================== ;;;;;
 
 
-;; 5. Proverava da li je potez validan 
+;; 5. Realizovati funkcije koje na osnovu zadatog poteza igraca, u obliku broj-stubica omogucava:
+;         - proveru da li je potez valjan
+;         - ako jeste, promenu prosledjenog stanja problema (igre) odigravanjem poteza
 
 ;; Proverava da li je potez validan
 ;Params:
@@ -236,8 +244,10 @@
 
 ;;;;; =========================================================================== ;;;;;
 
-;; 6. Omogucava da igrac igra
-
+;; Kreira funkcije za prevodjenje dekatnih brojeva u heksadekande i obrnuto
+;Params:
+;N : ukupan broj stubica 
+;brStubica : broj stubica, ali heksadekadna vrednost
 (defun kreiraj-associjativnu (N)
   (cond
     ((equalp N 0) '((#\0 0)))
@@ -246,9 +256,9 @@
 (defun convert-broj-stubica (brStubica) 
   (cadr (assoc brStubica (kreiraj-associjativnu (1- Nstubica)))))
 
-;;(kreiraj-associjativnu 16)
-
-;; (convert-broj-stubica (char-upcase #\0))
+;Test primeri:
+;(kreiraj-associjativnu 16)
+;(convert-broj-stubica (char-upcase #\0))
 
 ;; Funkcija kojom se vraca novo stanje
 ;Params:
@@ -283,7 +293,13 @@
 ;(odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'x 13)
 ;(odigraj '((x o x o) (x x x x) (x - - -) (x o - -) (x x x -) (x - - -)) 'o 2)
 
-;;;;; =========================================================================== ;;;;;
+
+;======================================================================================================================;
+;===================================================== DRUGA FAZA =====================================================;
+;======================================================================================================================;
+
+
+;; 6. Realizovati funkcije koje obezbedjuju odigravanje partije izmedju dva igraca
 
 ;; Rekuzivna petlja za igranje igre
 ;;Params
@@ -314,9 +330,12 @@
     (potez 'x tstanje)))
 
 
+;;Test:
 (igraj-connect-four)
 
+
 ;;;;; =========================================================================== ;;;;;
+
 
 ;;Funkcija koja generise sva stanja za trenutno stnaje i igraca koji je prosledjen
 ;Params
@@ -335,7 +354,9 @@
 
 ;(format t "~A" (vrati-moguca-stanja (init-stanje 4) 'X))
 
+
 ;;;;; =========================================================================== ;;;;;
+
 
 ;; Funkcija koja stampa ko je pobednik
 
