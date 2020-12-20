@@ -426,12 +426,10 @@
 
 ;(transponuj '((x o x o) (x x x x) (o x x o) (x o x o)))
 
-
 ;; Broji horizonatalno na stubicima koliko ima spojenih 
 ;;Params
 ;tstanje : trenutno stanje
 ;igrac : igrac za kog se broji
-
 (defun prebroj-horizonatalne (tstanje igrac) 
   (cond 
    ((null (caar tstanje)) 0)
@@ -441,6 +439,7 @@
           (+ 
             (prebroj-formatiranu-listu pstanje igrac)
             (prebroj-formatiranu-listu (transponuj pstanje) igrac)
+            (prebroj-dijagonale-sloja pstanje igrac) ;kad vec ovde obilazimo prebroji dijagonale gornjeg sloja
             (prebroj-horizonatalne sstanje igrac)
           )
    ))))
@@ -456,12 +455,115 @@
                          ;;expected 16, actual 16
 
 
-;; Broji dijagonalno na stubicima koliko ima spojenih 
+;; Izdvaja bocni sloj 
+;;Params
+;tstanje : trenutno stanje
+;stub : prvi stub u tom sloju koji izdvaja 
+(defun vrati-bocni-sloj (tstanje stub)
+  (cond 
+   ((>= stub Nstubica) '())
+   (t(cons (nth stub tstanje) (vrati-bocni-sloj tstanje (+ (isqrt Nstubica) stub))))))
+
+;; Izdvaja prednji sloj 
+;;Params
+;tstanje : trenutno stanje
+;stub : prvi stub u tom sloju koji izdvaja
+;N : pomocni brojac koji ide od (isqrt Nstubica) do 0
+(defun vrati-prednji-sloj (stanje stub N)
+  (cond
+   ((= N 0) '())
+   (t(cons (nth stub stanje) (vrati-prednji-sloj stanje (1+ stub) (1- N))))))
+
+;; Vraca glavnu dijagonalu prosledjenog sloja
+;;Params
+;sloj : izdvojeni sloj
+(defun vrati-dijagonalu (sloj)
+  (cond
+   ((null sloj) '())
+   ((null (car sloj)) '())
+   (t(cons (caar sloj) ( vrati-dijagonalu ( mapcar 'cdr (cdr sloj)))))))
+
+;; Vraca sve validne dijagonale iznad glavne, ukljucujuci i glavnu
+;;Params
+;sloj : izdvojeni sloj
+(defun vrati-dijagonale-iznad-glavne (sloj)
+  (cond
+   ((<(length (car sloj)) 4) '())
+   (t (cons (vrati-dijagonalu sloj) (vrati-dijagonale-iznad-glavne (mapcar 'cdr sloj))))))
+
+;; Vraca sve validne dijagonale ispod glavne
+;;Params
+;sloj : izdvojeni sloj
+(defun Vrati-dijagonale-ispod-glavne (sloj)
+  (cond
+   ((< (length (mapcar 'car sloj)) 4) '())
+   (t(cons (vrati-dijagonalu sloj) (Vrati-dijagonale-ispod-glavne (cdr sloj))))))
+
+;; Broji sve dijagonale na jednom sloju 
+;;Params
+;sloj : izdvojeni sloj
+;igrac : igrac za kog se broji
+(defun prebroj-dijagonale-sloja (sloj igrac)
+  (+ (prebroj-formatiranu-listu (vrati-dijagonale-iznad-glavne sloj) igrac)
+     (prebroj-formatiranu-listu (vrati-dijagonale-iznad-glavne (mapcar 'reverse sloj)) igrac)
+     (prebroj-formatiranu-listu (vrati-dijagonale-ispod-glavne (cdr sloj)) igrac)
+     (prebroj-formatiranu-listu (vrati-dijagonale-ispod-glavne (mapcar 'reverse (cdr sloj))) igrac)
+  ))
+
+;; Broji sve dijagonale na svim bocnim slojevima
+;;Params
+;tstanje : trenutno stanje
+;stub : prvi stub u sloju
+;igrac : igrac za kog se broji
+(defun prebroj-dijagonale-bocnih-slojeva (tstanje stub igrac)
+  (cond
+    ((= stub (isqrt Nstubica)) 0)
+    (t(+ (prebroj-dijagonale-sloja (vrati-bocni-sloj tstanje stub) igrac) (prebroj-dijagonale-bocnih-slojeva tstanje (1+ stub) igrac)))
+  ))
+
+;; Broji sve dijagonale na jednom sloju 
+;;Params
+;tstanje : trenutno stanje
+;stub : prvi stub u sloju
+;igrac : igrac za kog se broji
+(defun prebroj-dijagonale-prednjih-slojeva (tstanje stub igrac)
+  (cond
+   ((= stub Nstubica) 0)
+   (t(+ (prebroj-dijagonale-sloja (vrati-prednji-sloj s stub (isqrt Nstubica)) igrac) (prebroj-dijagonale-prednjih-slojeva s (+ stub (isqrt Nstubica)) igrac)))))
+
+
+;; Broji sve dijagonale u trenutnom stanju 
 ;;Params
 ;tstanje : trenutno stanje
 ;igrac : igrac za kog se broji
+(defun prebroj-dijagonalne (tstanje igrac) ;fali da se doda za dijagonalne slojeve
+  (+ (prebroj-dijagonale-prednjih-slojeva tstanje 0 igrac)
+     (prebroj-dijagonale-bocnih-slojeva tstanje 0 igrac)
+     
+  ))
 
-(defun prebroj-dijagonalne (tstanje igrac) 
-  (+ 0 0)
-)
 
+;;treba se napise ovde horizontalni slojevi
+
+
+
+
+;Test primeri
+;(setq Nstubica 16)
+;(setq sloj '((x x o o) (x x o o) (o o x x) (o o x x)))
+
+;(setq s '((x x o o) (x x o o) (o o x x) (o o x x)
+;          (x x o o) (x x o o) (o o x x) (o o x x) 
+;         (x x o o) (x x o o) (o o x x) (o o x x) 
+;          (x x o o) (x x o o) (o o x x) (o o x x)))
+
+;(prebroj-dijagonale-prednjih-slojeva s 0 'X)
+;(trace prebroj-dijagonale-bocnih-slojeva)
+;(vrati-bocni-sloj s 0)
+
+;(prebroj-dijagonale-sloja sloj 'X)
+;(vrati-dijagonale-iznad-glavne (mapcar 'reverse sloj))
+;(vrati-dijagonale-iznad-glavne sloj)
+;(vrati-dijagonale-ispod-glavne (cdr sloj))
+
+;(prebroj-dijagonalne s 'X)
