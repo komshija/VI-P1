@@ -339,7 +339,7 @@
 ;tstanje : trenutno stanje
 ;igrac : x/o
 (defun vrati-moguca-stanja (tstanje igrac)
-  (format t "~A"  (moguca-stanja tstanje igrac 0 NStubica)))
+  (moguca-stanja tstanje igrac 0 NStubica))
 
 ;;Pomocna funkcija koja igra potez od 0 do ukupnoStubica, tj igra virtuelene poteze
 
@@ -465,3 +465,41 @@
   (+ 0 0)
 )
 
+
+
+;======================================================================================================================;
+;===================================================== TRECA FAZA =====================================================;
+;======================================================================================================================;
+
+
+(defun max-stanje (lista-procenjenih-stanja)
+  (max-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
+
+(defun max-stanje-i (lista-procenjenih-stanja stanje-vrednost)
+  (cond ((null lista-procenjenih-stanja) stanje-vrednost)
+        ((> (cadar lista-procenjenih-stanja) (cadr stanje-vrednost)) (max-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
+        (t (max-stanje-i (cdr lista-procenjenih-stanja) stanje-vrednost))))
+
+(defun min-stanje (lista-procenjenih-stanja)
+  (min-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
+
+(defun min-stanje-i (lista-procenjenih-stanja stanje-vrednost)
+  (cond ((null lista-procenjenih-stanja) stanje-vrednost)
+        ((< (cadar lista-procenjenih-stanja) (cadr stanje-vrednost)) (min-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
+        (t (min-stanje-i (cdr lista-procenjenih-stanja) stanje-vrednost))))
+
+(defun proceni-stanje (stanje) ;; za pocetak dummy stanje
+  (- 1 (random 2))
+)
+
+(defun minimax (stanje dubina moj-potez)
+  (let (
+        (lp (vrati-moguca-stanja stanje (if moj-potez 'X 'O)));; treba se namesti tacno ko igra
+        (f (if moj-potez 'max-stanje 'min-stanje))
+      )
+  (cond 
+    ((or (zerop dubina) (null lp)) (list stanje (proceni-stanje stanje)))
+    (t (apply f (list (mapcar (lambda (x) (minimax x (1- dubina) (not moj-potez))) lp)))))))
+
+;(trace vrati-moguca-stanja)
+;(minimax (init-stanje 4) 4 t)
