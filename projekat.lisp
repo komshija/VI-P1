@@ -432,8 +432,6 @@
 ;tstanje : trenutno stanje
 ;igrac : igrac za kog se broji
 
-;;; NISAM SIGURAN 1000% dal je ovo ispravno, tj dal radi ispravno, za neke proste slucajeve moze da se kaze da vraca tacno
-
 (defun prebroj-horizonatalne (tstanje igrac) 
   (cond 
    ((null (caar tstanje)) 0)
