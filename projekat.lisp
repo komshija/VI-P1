@@ -199,6 +199,15 @@
     ))
 
 
+;; Print za potrebe testiranja
+;; (defun print-glavna (tstanje)
+;;   (let ()
+;;     (format t "~%~A" (get-support-chars Nstubica))
+;;     (print-stanje tstanje Nstubica)
+;;     (format t "~%~A" (get-support-chars Nstubica))
+;;     ))
+
+
 
 ;;Test primeri
 ;(format t "~%~A" (get-support-chars 16))
@@ -529,7 +538,7 @@
 (defun prebroj-dijagonale-prednjih-slojeva (tstanje stub igrac)
   (cond
    ((= stub Nstubica) 0)
-   (t(+ (prebroj-dijagonale-sloja (vrati-prednji-sloj s stub (isqrt Nstubica)) igrac) (prebroj-dijagonale-prednjih-slojeva s (+ stub (isqrt Nstubica)) igrac)))))
+   (t(+ (prebroj-dijagonale-sloja (vrati-prednji-sloj tstanje stub (isqrt Nstubica)) igrac) (prebroj-dijagonale-prednjih-slojeva tstanje (+ stub (isqrt Nstubica)) igrac)))))
 
 
 ;; Broji sve dijagonale u trenutnom stanju 
@@ -565,7 +574,22 @@
 ;(vrati-dijagonale-iznad-glavne (mapcar 'reverse sloj))
 ;(vrati-dijagonale-iznad-glavne sloj)
 ;(vrati-dijagonale-ispod-glavne (cdr sloj))
+;(prebroj-dijagonalne s 'X)
 
+(defun generisi-random (istanje pom rb) 
+    (cond 
+      ((equalp pom (* (isqrt Nstubica) Nstubica)) (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb))
+      ((< pom (isqrt Nstubica)) (generisi-random (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb) (1+ pom)  rb))
+      ((equalp (mod pom (isqrt Nstubica)) 0) (generisi-random (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb) (1+ pom) (1+ rb)))
+      (t (generisi-random (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb) (1+ pom) rb))))
+
+;(setq random-stanje (generisi-random (init-stanje 6) 0 0))
+;; (setq random-stanje '((X O X X O X) (O X X X O X) (X O X X X X) (X X O O O X) (X O X O X X) (X X X X O X) (O X X X O O) (X O X X O X) (O X O O X O) (O O X X O X) (O O O O X O) (O O X O X O) (O O O X X X)
+;;  (X O X O X X) (X X O X O X) (O X X O O X) (O X X O O X) (X O X O X O) (O X O O O O) (X O X X X X) (O O X O O X) (X X X X O X) (O O O O O O) (X X X X O X) (X O O X O O) (O O X O X X)
+;;  (X X O O O O) (O X X X O O) (O O O O O X) (O O O O X X) (O X X X O X) (X X O O O O) (X O X X O O) (X X X X O X) (X O O O X O) (O X X X X O)))
+
+;; (print-glavna random-stanje)
+;(prebroj-dijagonalne random-stanje 'X) ;14 za bocne i prednje, prebrojano rucno!
 
 
 ;======================================================================================================================;
@@ -604,4 +628,3 @@
 
 ;(trace vrati-moguca-stanja)
 ;(minimax (init-stanje 4) 4 t)
-;(prebroj-dijagonalne s 'X)
