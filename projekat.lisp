@@ -379,10 +379,10 @@
     (t (prebroj-cetri (cdr lista) karakter 0))))
 
 
-;(prebroj-cetri '(X X X X) 'X 0)
+;(prebroj-cetri '(X X X X X X) 'X 0)
 
 
-
+;(x x x x) (x x x x)
 (defun prebroj-formatiranu-listu (tstanje igrac) 
   (cond
     ((null tstanje) 0)
@@ -400,7 +400,7 @@
 ;;Params
 ;lista : lista koja se transformisa
 ;N : 'stranica' 
-
+;(x x x x x x x x x x .. x) => ((x x x x) (x x x x))
 (defun transformisi (lista N)
   (cond 
     ((not (equalp (length lista) (* N N))) '())
