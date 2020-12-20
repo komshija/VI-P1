@@ -566,7 +566,6 @@
 ;(vrati-dijagonale-iznad-glavne sloj)
 ;(vrati-dijagonale-ispod-glavne (cdr sloj))
 
-<<<<<<< HEAD
 
 
 ;======================================================================================================================;
@@ -605,6 +604,4 @@
 
 ;(trace vrati-moguca-stanja)
 ;(minimax (init-stanje 4) 4 t)
-=======
 ;(prebroj-dijagonalne s 'X)
->>>>>>> 1dbbe23be26cde932a58c9717ddc4e81acd7da7d
