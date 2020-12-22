@@ -665,7 +665,8 @@
 ;;  (X X O O O O) (O X X X O O) (O O O O O X) (O O O O X X) (O X X X O X) (X X O O O O) (X O X X O O) (X X X X O X) (X O O O X O) (O X X X X O)))
 
  ;;(print-glavna random-stanje)
-;(prebroj-dijagonalne random-stanje 'X) ;14 za bocne i prednje, prebrojano rucno!
+;(prebroj-dijagonalne random-stanje 'O) ;14 za bocne i prednje, prebrojano rucno!
+;(vrati-pobednika random-stanje)
 
 
 ;======================================================================================================================;
