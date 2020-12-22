@@ -340,7 +340,7 @@
     )
     (clear-input);; clearuje input, kad zove read-char unese i slovo + \n, i onda se desava da stampa dva puta..
     (cond 
-      ((validanp tstanje odigran-stubic)  (format t "~%Potez vraca: ~A " (potez (if (equalp igrac 'x) 'o 'x) (odigraj tstanje igrac odigran-stubic))));; igra sledeci
+      ((validanp tstanje odigran-stubic)  (potez (if (equalp igrac 'x) 'o 'x) (odigraj tstanje igrac odigran-stubic)));; igra sledeci
       (t (potez igrac tstanje))))));; igra opet, potez nevalidan
 )
 
@@ -704,4 +704,5 @@
     (t (apply f (list (mapcar (lambda (x) (minimax x (1- dubina) (not moj-potez))) lp)))))))
 
 ;(trace vrati-moguca-stanja)
-;(minimax (init-stanje 4) 4 t)
+;(minimax (init-stanje 4) 5 t)
+
