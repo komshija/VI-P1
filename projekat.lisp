@@ -307,6 +307,18 @@
 ;===================================================== DRUGA FAZA =====================================================;
 ;======================================================================================================================;
 
+;; Generise random stanje za proveru koda
+;;Params
+; istanje : inicijalno stanje
+; pom : pomocni brojac za kretanje kroz stubic
+; rb : broj stubica gde se ubacuje x ili o
+(defun generisi-random (istanje pom rb) 
+    (cond 
+      ((equalp pom (* (isqrt Nstubica) Nstubica)) (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb))
+      ((< pom (isqrt Nstubica)) (generisi-random (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb) (1+ pom)  rb))
+      ((equalp (mod pom (isqrt Nstubica)) 0) (generisi-random (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb) (1+ pom) (1+ rb)))
+      (t (generisi-random (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb) (1+ pom) rb))))
+
 
 ;; 6. Realizovati funkcije koje obezbedjuju odigravanje partije izmedju dva igraca
 
@@ -530,7 +542,7 @@
     (t(+ (prebroj-dijagonale-sloja (vrati-bocni-sloj tstanje stub) igrac) (prebroj-dijagonale-bocnih-slojeva tstanje (1+ stub) igrac)))
   ))
 
-;; Broji sve dijagonale na jednom sloju 
+;; Broji sve dijagonale na prednjih slojeva sloju 
 ;;Params
 ;tstanje : trenutno stanje
 ;stub : prvi stub u sloju
@@ -541,23 +553,86 @@
    (t(+ (prebroj-dijagonale-sloja (vrati-prednji-sloj tstanje stub (isqrt Nstubica)) igrac) (prebroj-dijagonale-prednjih-slojeva tstanje (+ stub (isqrt Nstubica)) igrac)))))
 
 
+;; Vraca dijagonalni sloj proslednjene kocke tj stanja
+;;Params
+;tstanje : trenutno stanje
+;N : pomocni brojac koji krece od 0 i povecava se za (isqrt Nstubica) + 1
+(defun vrati-dijagonalu-kocke (tstanje N)
+  (cond
+   ((null (nth N tstanje)) '())
+   (( and (= (mod N (isqrt Nstubica)) 0 ) (not(= N 0))) ())
+   (t(cons (nth N tstanje) ( vrati-dijagonalu-kocke tstanje (+ N (1+ (isqrt Nstubica))))))))
+
+
+;; Vraca dijagonalne slojeve ispod glavne dijagonale zakljucno sa glavnom dijagonalom
+;;Params
+;tstanje : trenutno stanje
+;N : pomocni brojac koji krece od 0 i uvecava za 1 dok je 4 > ((isqrt Nstubica) - N)
+(defun vrati-dijagonale-ispod-glavne-d-kocke (tstanje N)
+  (cond 
+   ((< (- (isqrt Nstubica) N) 4) '())
+   (t(cons (vrati-dijagonalu-kocke tstanje N) (vrati-dijagonale-ispod-glavne-d-kocke tstanje (1+ N))))))
+
+
+;; Okrece redosled stubova unazad na svakom prednjem sloju 
+;;Params
+;tstanje : trenutno stanje
+;N : pomocni brojac koji se uvecava za (isqrt Nstubica)
+(defun okreni-kocku (tstanje N)
+  (cond
+  ((or (= N Nstubica) (null (nth N tstanje))) '())
+   (t(append (reverse (vrati-prednji-sloj tstanje N (isqrt Nstubica))) (okreni-kocku tstanje (+ N (isqrt Nstubica)))))))
+
+
+;; Sklanja prednji sloj kocke 
+;;Params
+;tstanje : trenutno stanje
+(defun remove-front (tstanje)
+  (nthcdr (isqrt Nstubica) tstanje))
+
+
+;; Vraca dijagonalne slojeve iznad glavne dijagonale 
+;Params
+;tstanje : trenutno stanje
+;N : pomocni brojac koji krece od 0 i uvecava za 1 dok je 4 > ((isqrt Nstubica) - N - 1)
+(defun vrati-dijagonale-iznad-glavne-d-kocke (tstanje N)
+  (cond
+   ((< (- (- (isqrt Nstubica) 1) N) 4) '())
+   (t(cons (vrati-dijagonalu-kocke tstanje 0) (vrati-dijagonale-iznad-glavne-d-kocke (remove-front tstanje) (1+ N))))))
+
+
+;; Vraca sve moguce dijagonalne slojeve
+;Params
+;tstanje : trenutno stanje
+(defun vrati-sve-dijagonalne-slojeve (tstanje)
+  (append (vrati-dijagonale-ispod-glavne-d-kocke tstanje 0)
+          (vrati-dijagonale-ispod-glavne-d-kocke (okreni-kocku tstanje 0) 0)
+          (vrati-dijagonale-iznad-glavne-d-kocke (remove-front tstanje) 0)
+          (vrati-dijagonale-iznad-glavne-d-kocke (okreni-kocku (remove-front tstanje) 0) 0)))
+
+
+;; Broji pogotke za odredjenog igraca na svim dijagonalnim slojevima
+;Params
+;tstanje : trenutno stanje
+;igrac : igrac za kojeg se igra
+(defun prebroj-dijagonale-dijagonalnih-slojeva (slojevi igrac)
+  (cond
+   ((null slojevi) 0)
+   (t(+(prebroj-dijagonale-sloja (car slojevi) igrac) (prebroj-dijagonale-dijagonalnih-slojeva (cdr slojevi) igrac)))))
+
+
 ;; Broji sve dijagonale u trenutnom stanju 
 ;;Params
 ;tstanje : trenutno stanje
 ;igrac : igrac za kog se broji
-(defun prebroj-dijagonalne (tstanje igrac) ;fali da se doda za dijagonalne slojeve
+(defun prebroj-dijagonalne (tstanje igrac)
   (+ (prebroj-dijagonale-prednjih-slojeva tstanje 0 igrac)
      (prebroj-dijagonale-bocnih-slojeva tstanje 0 igrac)
+     (prebroj-dijagonale-dijagonalnih-slojeva (vrati-sve-dijagonalne-slojeve tstanje) igrac)
      
   ))
 
-
-;;treba se napise ovde horizontalni slojevi
-
-
-
-
-;Test primeri
+;Test primeri :
 ;(setq Nstubica 16)
 ;(setq sloj '((x x o o) (x x o o) (o o x x) (o o x x)))
 
@@ -574,21 +649,22 @@
 ;(vrati-dijagonale-iznad-glavne (mapcar 'reverse sloj))
 ;(vrati-dijagonale-iznad-glavne sloj)
 ;(vrati-dijagonale-ispod-glavne (cdr sloj))
-;(prebroj-dijagonalne s 'X)
+;(prebroj-dijagonalne random-stanje 'X)
 
-(defun generisi-random (istanje pom rb) 
-    (cond 
-      ((equalp pom (* (isqrt Nstubica) Nstubica)) (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb))
-      ((< pom (isqrt Nstubica)) (generisi-random (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb) (1+ pom)  rb))
-      ((equalp (mod pom (isqrt Nstubica)) 0) (generisi-random (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb) (1+ pom) (1+ rb)))
-      (t (generisi-random (odigraj istanje (if (equalp 0 (random 2)) 'x 'o) rb) (1+ pom) rb))))
+;(vrati-dijagonalu-kocke random-stanje 0)
+;(vrati-dijagonale-ispod-glavne-d-kocke random-stanje 0)
+;(vrati-dijagonale-ispod-glavne-d-kocke (okreni-kocku random-stanje 0) 0)
+;(vrati-dijagonale-iznad-glavne-d-kocke (remove-front random-stanje) 0)
+;(vrati-dijagonale-iznad-glavne-d-kocke (okreni-kocku (remove-front random-stanje) 0) 0)
+;(vrati-sve-dijagonalne-slojeve random-stanje)
+;(prebroj-dijagonale-dijagonalnih-slojeva (vrati-sve-dijagonalne-slojeve random-stanje) 'x)
 
 ;(setq random-stanje (generisi-random (init-stanje 6) 0 0))
 ;; (setq random-stanje '((X O X X O X) (O X X X O X) (X O X X X X) (X X O O O X) (X O X O X X) (X X X X O X) (O X X X O O) (X O X X O X) (O X O O X O) (O O X X O X) (O O O O X O) (O O X O X O) (O O O X X X)
 ;;  (X O X O X X) (X X O X O X) (O X X O O X) (O X X O O X) (X O X O X O) (O X O O O O) (X O X X X X) (O O X O O X) (X X X X O X) (O O O O O O) (X X X X O X) (X O O X O O) (O O X O X X)
 ;;  (X X O O O O) (O X X X O O) (O O O O O X) (O O O O X X) (O X X X O X) (X X O O O O) (X O X X O O) (X X X X O X) (X O O O X O) (O X X X X O)))
 
-;; (print-glavna random-stanje)
+ ;;(print-glavna random-stanje)
 ;(prebroj-dijagonalne random-stanje 'X) ;14 za bocne i prednje, prebrojano rucno!
 
 
