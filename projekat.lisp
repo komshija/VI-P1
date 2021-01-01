@@ -344,15 +344,55 @@
       (t (potez igrac tstanje))))));; igra opet, potez nevalidan
 )
 
+;;Petlja u kojoj se igra protiv AI
+
+;; (defun potez (igrac tstanje ai)
+;;   (cond 
+;;     ((krajp tstanje) 
+;;       (let* ()
+;;         (format t "~%Kraj igre.. Racunam pobednika..~%")
+;;         (vrati-pobednika tstanje))) ;; testira na kraj, => raucna pobednika ako je kraj
+    
+;;     (t (let* (
+;;       (temp (print-glavna tstanje)) ;;stampa
+;;       (novo-stanje 
+;;           (cond
+;;             ((not ai) (input-potez tstanje igrac))
+;;             (t (car (minimax tstanje 1 t))))
+;;       );;unos poteza
+;;     )
+;;     (potez (if (equalp 'x igrac) 'o 'x) novo-stanje (not ai))
+;; ))))
+    
+;; (defun input-potez (tstanje igrac)
+;;   (let* 
+;;     (
+;;       (odigran-stubic (progn (format t "~%Unesite stubic koji hocete da odigrate [ ~A ] :" igrac ) (convert-broj-stubica (char-upcase (read-char)))))
+;;     )
+;;     (clear-input);; clearuje input, kad zove read-char unese i slovo + \n, i onda se desava da stampa dva puta..
+;;     (cond
+;;       ((validanp tstanje odigran-stubic)  (odigraj tstanje igrac odigran-stubic))
+;;       (t (progn (format t "~%Nevalidan potez, odigrajte ponovo.")
+;;                 (input-potez tstanje igrac)))
+;;     )))
+
+
 ;; Funkcija koja pokrece celu igru
 ;Params
 ;
+
 (defun igraj-connect-four () 
   (let* ((tstanje (start-igra)))
     (potez 'x tstanje)))
 
+;;Funkcija u kojoj se pokrece igra za igru protiv AI
+
+;; (defun igraj-connect-four () 
+;;   (let* ((tstanje (start-igra)))
+;;     (potez 'x tstanje (not prvi-igrac))))
+
 ;;Test:
-;(igraj-connect-four)
+;; (igraj-connect-four)
 
 
 ;; Funkcija koja generise stanja u koja se moze doci na osnovu proizvoljnog stanja
@@ -377,6 +417,7 @@
 
 
 ;; Funkcija koja stampa ko je pobednik
+;; Funkcija poziva sve ostale funkcije za prebrojavanje
 
 (defun vrati-pobednika (tstanje)
   (let* 
@@ -387,7 +428,8 @@
       ((> X-spojene O-spojene) (format t "Pobednik je X."))
       (t (format t "Pobednik je O.")))))
 
-;; Funkcija koja broji 4 ponavljanja karaktera u listi
+;; Funkcija koja broji 4 ponavljanja karaktera u listi, koristi se za prebrojavanje poena
+; Za (x x x x x x) rezultat je 3
 ;;Params
 ;lista : lista koja se prosledjuje
 ;karakter : karakter koji se broji
@@ -399,15 +441,18 @@
     ((equalp karakter (car lista)) (prebroj-cetri (cdr lista) karakter (1+ br)))
     (t (prebroj-cetri (cdr lista) karakter 0))))
 
-
 ;(prebroj-cetri '(X X X X X X) 'X 0)
 
+;; Za svaki element u listi poziva prebroj-cetri, gde je tstanje prava lista
+;;Params
+;tstanje : prava lista, lista koja se broji
+;igrac : igrac za koga se broji
 
-;(x x x x) (x x x x)
 (defun prebroj-formatiranu-listu (tstanje igrac) 
   (cond
     ((null tstanje) 0)
     (t (+ (prebroj-cetri (car tstanje) igrac 0) (prebroj-formatiranu-listu (cdr tstanje) igrac)))))
+
 
 ;; Broji vertikalno na stubicima koliko ima spojenih 
 ;;Params
@@ -428,7 +473,9 @@
     (t (transformisi-tops lista N '()))
 ))
 
-;; Zvati preko tranformisi, vise je enkapsulirano
+;;Transformisi tops, pomocna funkcija za transformisi
+;; Napomena: Zvati preko tranformisi, vise je enkapsulirano
+
 (defun transformisi-tops (lista N pom) 
   (cond   
     ((null lista) (list pom))
@@ -438,6 +485,9 @@
 
 ;(transformisi-tops (get-top (init-stanje 6)) 6 '())
 
+;; Transponuje listu, tj ako listu posmatramo kao matricu, vratice transponovanu matricu
+;;Params
+;lista : lista koja se transponuje
 
 (defun transponuj (lista)
   (cond
@@ -447,7 +497,10 @@
 
 ;(transponuj '((x o x o) (x x x x) (o x x o) (x o x o)))
 
-;; Broji horizonatalno na stubicima koliko ima spojenih 
+
+;; Broji horizonatalno na stubicima koliko ima spojenih, u oba smera i dijagonalno
+;; Prakticno ako se sa svakog stubica skine po jedan potez i napravi se matrica od toga,
+;; na tome se broji
 ;;Params
 ;tstanje : trenutno stanje
 ;igrac : igrac za kog se broji
@@ -476,7 +529,7 @@
                          ;;expected 16, actual 16
 
 
-;; Izdvaja bocni sloj 
+;; Izdvaja bocni sloj
 ;;Params
 ;tstanje : trenutno stanje
 ;stub : prvi stub u tom sloju koji izdvaja 
@@ -672,37 +725,37 @@
 ;======================================================================================================================;
 ;===================================================== TRECA FAZA =====================================================;
 ;======================================================================================================================;
+;; In progress..
 
+;; (defun max-stanje (lista-procenjenih-stanja)
+;;   (max-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
 
-(defun max-stanje (lista-procenjenih-stanja)
-  (max-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
+;; (defun max-stanje-i (lista-procenjenih-stanja stanje-vrednost)
+;;   (cond ((null lista-procenjenih-stanja) stanje-vrednost)
+;;         ((> (cadar lista-procenjenih-stanja) (cadr stanje-vrednost)) (max-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
+;;         (t (max-stanje-i (cdr lista-procenjenih-stanja) stanje-vrednost))))
 
-(defun max-stanje-i (lista-procenjenih-stanja stanje-vrednost)
-  (cond ((null lista-procenjenih-stanja) stanje-vrednost)
-        ((> (cadar lista-procenjenih-stanja) (cadr stanje-vrednost)) (max-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
-        (t (max-stanje-i (cdr lista-procenjenih-stanja) stanje-vrednost))))
+;; (defun min-stanje (lista-procenjenih-stanja)
+;;   (min-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
 
-(defun min-stanje (lista-procenjenih-stanja)
-  (min-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
+;; (defun min-stanje-i (lista-procenjenih-stanja stanje-vrednost)
+;;   (cond ((null lista-procenjenih-stanja) stanje-vrednost)
+;;         ((< (cadar lista-procenjenih-stanja) (cadr stanje-vrednost)) (min-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
+;;         (t (min-stanje-i (cdr lista-procenjenih-stanja) stanje-vrednost))))
 
-(defun min-stanje-i (lista-procenjenih-stanja stanje-vrednost)
-  (cond ((null lista-procenjenih-stanja) stanje-vrednost)
-        ((< (cadar lista-procenjenih-stanja) (cadr stanje-vrednost)) (min-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
-        (t (min-stanje-i (cdr lista-procenjenih-stanja) stanje-vrednost))))
+;; (defun proceni-stanje (stanje) ;; za pocetak dummy stanje
+;;   (- 1 (random 2))
+;; )
 
-(defun proceni-stanje (stanje) ;; za pocetak dummy stanje
-  (- 1 (random 2))
-)
+;; (defun minimax (stanje dubina moj-potez)
+;;   (let (
+;;         (lp (vrati-moguca-stanja stanje (if (not prvi-igrac) 'X 'O)))
+;;         (f (if moj-potez 'max-stanje 'min-stanje))
+;;       )
+;;   (cond 
+;;     ((or (zerop dubina) (null lp)) (list stanje (proceni-stanje stanje)))
+;;     (t (apply f (list (mapcar (lambda (x) (minimax x (1- dubina) (not moj-potez))) lp)))))))
 
-(defun minimax (stanje dubina moj-potez)
-  (let (
-        (lp (vrati-moguca-stanja stanje (if moj-potez 'X 'O)));; treba se namesti tacno ko igra
-        (f (if moj-potez 'max-stanje 'min-stanje))
-      )
-  (cond 
-    ((or (zerop dubina) (null lp)) (list stanje (proceni-stanje stanje)))
-    (t (apply f (list (mapcar (lambda (x) (minimax x (1- dubina) (not moj-potez))) lp)))))))
-
-;(trace vrati-moguca-stanja)
-;(minimax (init-stanje 4) 5 t)
+;; ;(trace vrati-moguca-stanja)
+;; ;(minimax (init-stanje 4) 5 t)
 
