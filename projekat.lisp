@@ -796,8 +796,8 @@
        )
     (cond
      ((or (zerop dubina) (null potezi)) (proceni-stanje stanje))
-     ((eq igrac t) (max_igrac potezi (list (car potezi) alfa) dubina alfa beta ))
-     (t (min_igrac potezi (list (car potezi) beta) dubina alfa beta ))
+     ((eq igrac t) (max_igrac potezi (list (car potezi) -10000) dubina alfa beta ))
+     (t (min_igrac potezi (list (car potezi) 10000) dubina alfa beta ))
      )
    )
   )
