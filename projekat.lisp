@@ -47,7 +47,7 @@
 
 
 ;; Test primeri
-;(init-stanje 4)
+(init-stanje 4)
 ;(init-stanje 6)
 
 
@@ -399,6 +399,8 @@
 ;Params
 ;tstanje : trenutno stanje
 ;igrac : x/o
+
+
 (defun vrati-moguca-stanja (tstanje igrac)
   (moguca-stanja tstanje igrac 0 NStubica))
 
@@ -407,11 +409,27 @@
 (defun moguca-stanja (tstanje igrac brStubic ukupnoStubica)
   (cond
     ((equalp ukupnoStubica brStubic) '())
-    (t (cons (odigraj tstanje igrac brStubic) (moguca-stanja tstanje igrac (1+ brStubic) ukupnoStubica)))
-  ))
+   (t
+    (let (
+          (novoStanje (odigraj tstanje igrac brStubic))
+          )
+          (
+           if (equal tstanje novoStanje) 
+               (moguca-stanja tstanje igrac (1+ brStubic) ukupnoStubica)
+             (cons novoStanje (moguca-stanja tstanje igrac (1+ brStubic) ukupnoStubica))
+          )
+         )
+      )
+    )
+   )
+ 
 
-;(format t "~A" (vrati-moguca-stanja (init-stanje 4) 'X))
 
+
+
+
+(format t "~A" (vrati-moguca-stanja (init-stanje 4) 'X))
+(init-stanje 2)
 
 ;;;;; =========================================================================== ;;;;;
 
@@ -524,7 +542,7 @@
 ;; (prebroj-horizonatalne '((x o x o) (x o x o) (x o x o) (x o x o) 
 ;;                          (x o x o) (x o x o) (x o x o) (x o x o) 
 ;;                          (x o x o) (x o x o) (x o x o) (x o x o) 
-;;                          (x o x o) (x o x o) (x o x o) (x o x o)) 'X)
+;;                          (x o x o) (x o x o) (x o x o) (x o x o)))
 
                          ;;expected 16, actual 16
 
@@ -743,9 +761,9 @@
 ;;         ((< (cadar lista-procenjenih-stanja) (cadr stanje-vrednost)) (min-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
 ;;         (t (min-stanje-i (cdr lista-procenjenih-stanja) stanje-vrednost))))
 
-;; (defun proceni-stanje (stanje) ;; za pocetak dummy stanje
-;;   (- 1 (random 2))
-;; )
+ (defun proceni-stanje (stanje) ;; za pocetak dummy stanje
+    (random 3))
+ 
 
 ;; (defun minimax (stanje dubina moj-potez)
 ;;   (let (
@@ -758,4 +776,80 @@
 
 ;; ;(trace vrati-moguca-stanja)
 ;; ;(minimax (init-stanje 4) 5 t)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(defun minmax (stanje dubina alfa beta igrac)
+  (let(
+       (potezi (vrati-moguca-stanja stanje (if igrac 'X 'O)))
+       )
+    (cond
+     ((or (zerop dubina) (null potezi)) (proceni-stanje stanje))
+     ((eq igrac t) (max_igrac potezi (list (car potezi) alfa) dubina alfa beta ))
+     (t (min_igrac potezi (list (car potezi) beta) dubina alfa beta ))
+     )
+   )
+  )
+
+
+;maxPV maksimalna vrednost poteza, d dubina
+(defun max_igrac (potezi maxPV d alfa beta)
+  (cond
+   ((null potezi) maxPV)
+   (t
+  (let*
+        (
+         (mm (minmax (car potezi) (1- d) alfa beta '()))
+         (currPV (list (car potezi) (if (not (listp mm)) mm (cadr mm))))
+         )
+    (cond 
+          ((>= alfa beta) maxPV)
+          ((> (cadr currPV) alfa) (max_igrac (cdr potezi) currPV d (cadr currPV) beta))
+          ((> (cadr currPV) (cadr maxPV)) (max_igrac (cdr potezi) currPV d alfa beta))
+          (t (max_igrac (cdr potezi) maxPV d alfa beta))
+          )
+    )
+    ))
+ )
+
+
+(defun min_igrac (potezi minPV d alfa beta)
+  (cond
+   ((null potezi) minPV)
+   (t
+  (let*
+        (
+         (mm (minmax (car potezi) (1- d) alfa beta t))
+         (currPV (list (car potezi) (if (not (listp mm)) mm (cadr mm))))
+         )
+    (cond 
+          ((>= alfa beta) minPV)
+          ((< (cadr currPV) beta) (min_igrac (cdr potezi) currPV d alfa (cadr currPV)))
+          ((< (cadr currPV) (cadr minPV)) (min_igrac (cdr potezi) currPV d alfa beta))
+          (t (min_igrac (cdr potezi) minPV d alfa beta))
+          )
+    )
+    ))
+  )
+(init-stanje 4)
+
+(setq probno_stanje '((x o x o) (x o x o) (x o x o) (x o x o) (x o - -) (x o x o) (x o x o) (x o - -) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o)))
+(trace minmax)
+(trace max_igrac)
+(trace min_igrac)
+
+(minmax probno_stanje 4 -5000 5000 t)
+
+
 
