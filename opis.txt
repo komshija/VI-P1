@@ -6,4 +6,13 @@ Aleksandar Randjelovic 16839
 Za fazu 1 su napravljene sve funkcije, u .lisp fajlu je sve prokomentarisano.
 Stanje igre predstavljamo kao pravu listu. 
 Spojeno je sve, tj omogucena je petlja(rekuzivno) da se igra igra pozivom funkcije (igraj-connect-four).
-Nismo stigli da zavrsimo racunanje pobednika, ali bice za drugu fazu. 
+
+
+Za fazu 2 napravljeno da se na osnovu proizvoljnog stanja generisu moguca stanja za prosledjenog igraca.
+Zavrsena je logika za racunanje pobednika. 
+Postoje 3 funkcije:
+* prebroj-horizontalne
+* prebroj-vertikalne
+* prebroj-dijagonalne
+
+Prebroj horizontalne posmatra svaki red na celoj tabli, kao matricu. 

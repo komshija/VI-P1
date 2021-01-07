@@ -327,26 +327,7 @@
 ; igrac : x / o
 ; tstanje : trenutno stanje igre
 
-(defun potez (igrac tstanje)
-  (cond 
-    ((krajp tstanje) 
-      (let* ()
-        (format t "~%Kraj igre.. Racunam pobednika..~%")
-        (vrati-pobednika tstanje))) ;; testira na kraj, => raucna pobednika ako je kraj
-    
-    (t (let* (
-      (temp (print-glavna tstanje)) ;;stampa
-      (odigran-stubic (progn (format t "~%Unesite stubic koji hocete da odigrate [ ~A ] :" igrac ) (convert-broj-stubica (char-upcase (read-char)))));;unos poteza
-    )
-    (clear-input);; clearuje input, kad zove read-char unese i slovo + \n, i onda se desava da stampa dva puta..
-    (cond 
-      ((validanp tstanje odigran-stubic)  (potez (if (equalp igrac 'x) 'o 'x) (odigraj tstanje igrac odigran-stubic)));; igra sledeci
-      (t (potez igrac tstanje))))));; igra opet, potez nevalidan
-)
-
-;;Petlja u kojoj se igra protiv AI
-
-;; (defun potez (igrac tstanje ai)
+;; (defun potez (igrac tstanje)
 ;;   (cond 
 ;;     ((krajp tstanje) 
 ;;       (let* ()
@@ -355,41 +336,60 @@
     
 ;;     (t (let* (
 ;;       (temp (print-glavna tstanje)) ;;stampa
-;;       (novo-stanje 
-;;           (cond
-;;             ((not ai) (input-potez tstanje igrac))
-;;             (t (car (minimax tstanje 1 t))))
-;;       );;unos poteza
-;;     )
-;;     (potez (if (equalp 'x igrac) 'o 'x) novo-stanje (not ai))
-;; ))))
-    
-;; (defun input-potez (tstanje igrac)
-;;   (let* 
-;;     (
-;;       (odigran-stubic (progn (format t "~%Unesite stubic koji hocete da odigrate [ ~A ] :" igrac ) (convert-broj-stubica (char-upcase (read-char)))))
+;;       (odigran-stubic (progn (format t "~%Unesite stubic koji hocete da odigrate [ ~A ] :" igrac ) (convert-broj-stubica (char-upcase (read-char)))));;unos poteza
 ;;     )
 ;;     (clear-input);; clearuje input, kad zove read-char unese i slovo + \n, i onda se desava da stampa dva puta..
-;;     (cond
-;;       ((validanp tstanje odigran-stubic)  (odigraj tstanje igrac odigran-stubic))
-;;       (t (progn (format t "~%Nevalidan potez, odigrajte ponovo.")
-;;                 (input-potez tstanje igrac)))
-;;     )))
+;;     (cond 
+;;       ((validanp tstanje odigran-stubic)  (potez (if (equalp igrac 'x) 'o 'x) (odigraj tstanje igrac odigran-stubic)));; igra sledeci
+;;       (t (potez igrac tstanje))))));; igra opet, potez nevalidan
+;; )
+
+;;Petlja u kojoj se igra protiv AI
+
+(defun potez (igrac tstanje ai)
+  (cond 
+    ((krajp tstanje) 
+      (let* ()
+        (format t "~%Kraj igre.. Racunam pobednika..~%")
+        (vrati-pobednika tstanje))) ;; testira na kraj, => raucna pobednika ako je kraj
+    
+    (t (let* (
+      (temp (print-glavna tstanje)) ;;stampa
+      (novo-stanje 
+          (cond
+            ((not ai) (input-potez tstanje igrac))
+            (t (car (minmax tstanje 4 -5000 5000 ai))))
+      );;unos poteza
+    )
+    (potez (if (equalp 'x igrac) 'o 'x) novo-stanje (not ai))
+))))
+    
+(defun input-potez (tstanje igrac)
+  (let* 
+    (
+      (odigran-stubic (progn (format t "~%Unesite stubic koji hocete da odigrate [ ~A ] :" igrac ) (convert-broj-stubica (char-upcase (read-char)))))
+    )
+    (clear-input);; clearuje input, kad zove read-char unese i slovo + \n, i onda se desava da stampa dva puta..
+    (cond
+      ((validanp tstanje odigran-stubic)  (odigraj tstanje igrac odigran-stubic))
+      (t (progn (format t "~%Nevalidan potez, odigrajte ponovo.")
+                (input-potez tstanje igrac)))
+    )))
 
 
 ;; Funkcija koja pokrece celu igru
 ;Params
 ;
 
-(defun igraj-connect-four () 
-  (let* ((tstanje (start-igra)))
-    (potez 'x tstanje)))
+;; (defun igraj-connect-four () 
+;;   (let* ((tstanje (start-igra)))
+;;     (potez 'x tstanje)))
 
 ;;Funkcija u kojoj se pokrece igra za igru protiv AI
 
-;; (defun igraj-connect-four () 
-;;   (let* ((tstanje (start-igra)))
-;;     (potez 'x tstanje (not prvi-igrac))))
+(defun igraj-connect-four () 
+  (let* ((tstanje (start-igra)))
+    (potez 'x tstanje (not prvi-igrac))))
 
 ;;Test:
 ;; (igraj-connect-four)
@@ -428,8 +428,8 @@
 
 
 
-(format t "~A" (vrati-moguca-stanja (init-stanje 4) 'X))
-(init-stanje 2)
+;(format t "~A" (vrati-moguca-stanja (init-stanje 4) 'X))
+;(init-stanje 2)
 
 ;;;;; =========================================================================== ;;;;;
 
@@ -779,17 +779,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 (defun minmax (stanje dubina alfa beta igrac)
   (let(
        (potezi (vrati-moguca-stanja stanje (if igrac 'X 'O)))
@@ -842,14 +831,14 @@
     )
     ))
   )
-(init-stanje 4)
+;; (init-stanje 4)
 
-(setq probno_stanje '((x o x o) (x o x o) (x o x o) (x o x o) (x o - -) (x o x o) (x o x o) (x o - -) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o)))
-(trace minmax)
-(trace max_igrac)
-(trace min_igrac)
+;; (setq probno_stanje '((x o x o) (x o x o) (x o x o) (x o x o) (x o - -) (x o x o) (x o x o) (x o - -) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o) (x o x o)))
+;; (trace minmax)
+;; (trace max_igrac)
+;; (trace min_igrac)
 
-(minmax probno_stanje 4 -5000 5000 t)
+;; (minmax probno_stanje 4 -5000 5000 t)
 
 
 
