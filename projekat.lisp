@@ -310,7 +310,7 @@
 ;; Generise random stanje za proveru koda
 ;;Params
 ; istanje : inicijalno stanje
-; pom : pomocni brojac za kretanje kroz stubic
+; pom : pomocni brojac za kretanje kroz stubic 0
 ; rb : broj stubica gde se ubacuje x ili o
 (defun generisi-random (istanje pom rb) 
     (cond 
@@ -526,7 +526,7 @@
   (cond 
    ((null (caar tstanje)) 0)
    (t (let 
-          ((pstanje (transformisi (get-top tstanje) 4)) ;; za sad zovem za 4 
+          ((pstanje (transformisi (get-top tstanje) (isqrt Nstubica)))  
            (sstanje (remove-top tstanje)))
           (+ 
             (prebroj-formatiranu-listu pstanje igrac)
@@ -744,46 +744,16 @@
 ;===================================================== TRECA FAZA =====================================================;
 ;======================================================================================================================;
 
-;; (defun max-stanje (lista-procenjenih-stanja)
-;;   (max-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
 
-;; (defun max-stanje-i (lista-procenjenih-stanja stanje-vrednost)
-;;   (cond ((null lista-procenjenih-stanja) stanje-vrednost)
-;;         ((> (cadar lista-procenjenih-stanja) (cadr stanje-vrednost)) (max-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
-;;         (t (max-stanje-i (cdr lista-procenjenih-stanja) stanje-vrednost))))
 
-;; (defun min-stanje (lista-procenjenih-stanja)
-;;   (min-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
-
-;; (defun min-stanje-i (lista-procenjenih-stanja stanje-vrednost)
-;;   (cond ((null lista-procenjenih-stanja) stanje-vrednost)
-;;         ((< (cadar lista-procenjenih-stanja) (cadr stanje-vrednost)) (min-stanje-i (cdr lista-procenjenih-stanja) (car lista-procenjenih-stanja)))
-;;         (t (min-stanje-i (cdr lista-procenjenih-stanja) stanje-vrednost))))
-
- (defun proceni-stanje (stanje) ;; za pocetak dummy stanje
-    (random 3))
  
-
-;; (defun minimax (stanje dubina moj-potez)
-;;   (let (
-;;         (lp (vrati-moguca-stanja stanje (if (not prvi-igrac) 'X 'O)))
-;;         (f (if moj-potez 'max-stanje 'min-stanje))
-;;       )
-;;   (cond 
-;;     ((or (zerop dubina) (null lp)) (list stanje (proceni-stanje stanje)))
-;;     (t (apply f (list (mapcar (lambda (x) (minimax x (1- dubina) (not moj-potez))) lp)))))))
-
-;; ;(trace vrati-moguca-stanja)
-;; ;(minimax (init-stanje 4) 5 t)
-
-
 
 (defun minmax (stanje dubina alfa beta igrac)
   (let(
        (potezi (vrati-moguca-stanja stanje (if igrac 'X 'O)))
        )
     (cond
-     ((or (zerop dubina) (null potezi)) (proceni-stanje stanje))
+     ((or (zerop dubina) (null potezi)) (proceni-stanje stanje (if igrac 'X 'O)))
      ((eq igrac t) (max_igrac potezi (list (car potezi) -10000) dubina alfa beta ))
      (t (min_igrac potezi (list (car potezi) 10000) dubina alfa beta ))
      )
@@ -840,6 +810,7 @@
 ;; (minmax probno_stanje 4 -5000 5000 t)
 
 
+;; Procena stanja prebacena na kraj fajla
 
 ;======================================================================================================================;
 ;==================================================== CETVRTA FAZA ====================================================;
@@ -1166,5 +1137,81 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Rezime pravila za masinu za zakljucivanje
 
-;;; Zakljucivanje
+;; Funkcije koje se zovu u predikatu mora da imaju ime koje pocinje s =
+;; Svaka promenjiva pocinje s ?
+;; Predikati, tj funkcije koje vracaju true ili false pocinju s !
+
+;; (prepare-knowledge lr lf maxdepth) - pripremiti znanje; lr : lista pravila, lf : lista cinjenica, maxdepth - maks dubina
+;; (infer q)- zakljuci; q : upit
+;; (count-results q ) - prebroji zakljucke, q : upit
+
+;; upiti se spajaju s AND
+;; (AND (voli 'marko 'milica ) ...) 
+
+;;
+ (defun proceni-stanje (tstanje igrac) ;; za pocetak dummy procena stanja
+    (let* 
+    ((X-spojene (+ (prebroj-horizonatalne tstanje 'X) (prebroj-vertikalne tstanje 'X) (prebroj-dijagonalne tstanje 'X)))
+      (O-spojene (+ (prebroj-horizonatalne tstanje 'O) (prebroj-vertikalne tstanje 'O) (prebroj-dijagonalne tstanje 'O))))
+    
+    (cond 
+      ((equalp igrac 'X) (- O-spojene X-spojene))
+      (t (- X-spojene O-spojene))
+    )))
+
+
+
+(defun !eq (a b)
+	(equal a b))
+(defun !ne (a b)
+	(not (equal a b)))
+
+;; 1. Razlika broja poena, tj. ko ima vise spojenih - DONE
+;; 2. Da zakljuci broj mogucih poena, npr. ako ostalo 1 polje nepopunjeno do 4 u nizu 
+;; 3. Da racuna opasnost, tj. kolko protivik ima 3 spojene, ako igrac ima odredjeno npr. da gleda da sabotira nekako njega da dodbije poene
+;; Mozda da svaki od ovih faktora da ima neki prioritet, tj da se mnozi s nekim koeficijentom
+
+
+(setq random-stanje (generisi-random (init-stanje 4) 0 0))
+;(print-glavna random-stnaje)
+
+;; mozda zatreba
+(defun get-matrix-position (stanje i j)
+  (cond
+    ((OR (> i Nstubica) (> j (isqrt Nstubica))) '())
+    (t (nth j (nth i stanje)))
+  )
+)
+
+(defun vrati-horizonatalne-stapice (tstanje) 
+  (cond 
+   ((null (caar tstanje)) '())
+   (t (let 
+          ((pstanje (transformisi (get-top tstanje) (isqrt Nstubica)))  
+           (sstanje (remove-top tstanje)))
+
+          (append 
+            (list pstanje)
+            (list (transponuj pstanje))
+            (vrati-horizonatalne-stapice sstanje)
+          )
+   ))))
+
+
+
+;; (defun vrati-cinjenice (stanje)
+;;   (cond
+;;     ();; neki uslov za kraj
+;;     (t 
+;;       (let* 
+;;         (vertikalni-stapici (stanje))
+;;         (horizontalni-stapici (vrati-horizontalne-stapice stanje))
+;;         (dijagonalni-stapici ())
+;;       )
+;;     )
+;;   )
+;; )
+
+
