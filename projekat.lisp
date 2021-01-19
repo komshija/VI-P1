@@ -358,7 +358,7 @@
       (novo-stanje 
           (cond
             (covek (input-potez tstanje igrac))
-            (t (car (minmax tstanje 4 -5000 5000  (not prvi-igrac)))))
+            (t (car (minmax tstanje 8 -5000 5000  (not prvi-igrac)))))
       );;unos poteza
     )
     (potez (if (equalp 'x igrac) 'o 'x) novo-stanje (not covek))
@@ -693,7 +693,7 @@
 (defun vrati-dijagonale-gornjih-slojeva (tstanje)
   (cond
    ((null (caar tstanje)) '())
-   (t (append (vrati-dijagonale-sloja (transformisi (get-top random-stanje) (isqrt Nstubica))) (vrati-dijagonale-gornjih-slojeva (remove-top tstanje))))))
+   (t (append (vrati-dijagonale-sloja (transformisi (get-top tstanje) (isqrt Nstubica))) (vrati-dijagonale-gornjih-slojeva (remove-top tstanje))))))
 
 ;;Vraca listu svih mogucih dijagonala u igri
 ;Params
@@ -701,7 +701,7 @@
 (defun vrati-sve-dijagonale (tstanje)
   (append (vrati-dijagonale-prednjih-slojeva tstanje 0)
           (vrati-dijagonale-bocnih-slojeva tstanje 0)
-          (vrati-dijagonale-gornjih-slojeva random-stanje)
+          (vrati-dijagonale-gornjih-slojeva tstanje)
           (vrati-dijagonale-dijagonalnih-slojeva (vrati-sve-dijagonalne-slojeve tstanje))))
 
 ;; Broji sve dijagonale u trenutnom stanju 
@@ -1156,21 +1156,9 @@
 ;; upiti se spajaju s AND
 ;; (AND (voli 'marko 'milica ) ...) 
 
-;;
- (defun proceni-stanje (tstanje igrac) ;; za pocetak dummy procena stanja
-    (let* 
-    ((X-spojene (+ (prebroj-horizonatalne tstanje 'X) (prebroj-vertikalne tstanje 'X) (prebroj-dijagonalne tstanje 'X)))
-      (O-spojene (+ (prebroj-horizonatalne tstanje 'O) (prebroj-vertikalne tstanje 'O) (prebroj-dijagonalne tstanje 'O))))
-    
-    (cond 
-      ((equalp igrac 'X) (- O-spojene X-spojene))
-      (t (- X-spojene O-spojene))
-    )))
-
-
-
 (defun !eq (a b)
 	(equal a b))
+
 (defun !ne (a b)
 	(not (equal a b)))
 
@@ -1199,25 +1187,77 @@
            (sstanje (remove-top tstanje)))
 
           (append 
-            (list pstanje)
-            (list (transponuj pstanje))
+            pstanje
+            (transponuj pstanje)
             (vrati-horizonatalne-stapice sstanje)
           )
    ))))
 
+(defun vrati-sve-stapice (stanje)
+  (append
+    stanje
+    (vrati-horizonatalne-stapice stanje)
+    (vrati-sve-dijagonale stanje)
+  )
+)
 
+(defun prebroj-prazne (lista)
+  (cond 
+    ((null lista) 0)
+    ((equalp '- (car lista)) (1+ (prebroj-prazne (cdr lista))))
+    (t (prebroj-prazne (cdr lista)))))
 
-;; (defun vrati-cinjenice (stanje)
-;;   (cond
-;;     ();; neki uslov za kraj
-;;     (t 
-;;       (let* 
-;;         (vertikalni-stapici (stanje))
-;;         (horizontalni-stapici (vrati-horizontalne-stapice stanje))
-;;         (dijagonalni-stapici ())
-;;       )
+;; Vraca broj potencijalnih poena za n-torku
+;; Npr. (x x x -) => 1, jer moguce da dobije samo 1 poen 
+;; (o x x x - -) => 2, jer moguce da dobije jos 2 poena ako spoji jos dva poteza
+;; params
+;; lista : n-torka
+;; karakter : igrac
+;; br : 0
+(defun prebroj-potencijalne (lista karakter br)
+  (cond 
+    ((null lista) 0)
+    ((and (equalp br 3) (equalp '- (car lista))) (1+ (prebroj-potencijalne (cdr lista) karakter br)))
+    ((equalp karakter (car lista)) (prebroj-potencijalne (cdr lista) karakter (1+ br)))
+    (t (prebroj-potencijalne (cdr lista) karakter 0))))
+
+(defun prebroj-potencijalne-stanje (tstanje igrac)
+  (cond
+    ((null tstanje) 0)
+    (t (+ (prebroj-potencijalne (car tstanje) igrac 0) (prebroj-potencijalne-stanje (cdr tstanje) igrac)))
+  )
+)
+
+;;(prebroj-potencijalne-stanje (vrati-sve-stapice '((x x x -) (- - - -) (- - - -) (- - - -) (x - - -) (- - - -) (- - - -) (- - - -) (x - - -) (- - - -) (- - - -) (- - - -) (- - - -) (- - - -) (- - - -) (- - - -))) 'x)
+
+;; (defun vrati-cinjenicu-za-stapic (stap igrac n)
+;;   (
+;;     (list 
+;;       (prebroj-prazne stap)
+;;       (proveri-potencijalne stap igrac 0)
+
 ;;     )
+
+;;   )
+;; )
+
+;; (defparameter *RULES* 
+;;  '(
+;;     (if (Vise ?x ) ())
 ;;   )
 ;; )
 
 
+(defun proceni-stanje (tstanje igrac)
+    (let* 
+      (
+        (X-spojene (+ (prebroj-horizonatalne tstanje 'X) (prebroj-vertikalne tstanje 'X) (prebroj-dijagonalne tstanje 'X)))
+        (O-spojene (+ (prebroj-horizonatalne tstanje 'O) (prebroj-vertikalne tstanje 'O) (prebroj-dijagonalne tstanje 'O)))
+
+      )
+    
+    (cond 
+      ((equalp igrac 'X) (+ (- O-spojene X-spojene) (prebroj-potencijalne-stanje (vrati-sve-stapice tstanje) 'X)))
+      (t (+ (- X-spojene O-spojene) (prebroj-potencijalne-stanje (vrati-sve-stapice tstanje) 'O))))))
+
+(igraj-connect-four)
