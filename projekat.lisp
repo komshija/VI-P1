@@ -358,7 +358,7 @@
       (novo-stanje 
           (cond
             (covek (input-potez tstanje igrac))
-            (t (car (minmax tstanje 8 -5000 5000  (not prvi-igrac)))))
+            (t (car (minmax tstanje 6 -5000 5000  (not prvi-igrac)))))
       );;unos poteza
     )
     (potez (if (equalp 'x igrac) 'o 'x) novo-stanje (not covek))
@@ -1216,9 +1216,11 @@
 ;; br : 0
 (defun prebroj-potencijalne (lista karakter br)
   (cond 
+	;;((and (null lista) (>= br 3)) 1)
     ((null lista) 0)
     ((and (equalp br 3) (equalp '- (car lista))) (1+ (prebroj-potencijalne (cdr lista) karakter br)))
     ((equalp karakter (car lista)) (prebroj-potencijalne (cdr lista) karakter (1+ br)))
+    ((and (equalp (car lista) '-) (equalp (cadr lista) karakter)) (prebroj-potencijalne (cddr lista) karakter (1+ br)))
     (t (prebroj-potencijalne (cdr lista) karakter 0))))
 
 (defun prebroj-potencijalne-stanje (tstanje igrac)
@@ -1250,9 +1252,9 @@
 
 (defun proceni-stanje (tstanje igrac)
     (let* 
-      (
-        (X-spojene (+ (prebroj-horizonatalne tstanje 'X) (prebroj-vertikalne tstanje 'X) (prebroj-dijagonalne tstanje 'X)))
-        (O-spojene (+ (prebroj-horizonatalne tstanje 'O) (prebroj-vertikalne tstanje 'O) (prebroj-dijagonalne tstanje 'O)))
+     (
+        (X-spojene (+ (prebroj-horizonatalne tstanje 'X) (prebroj-vertikalne tstanje 'X) (prebroj-dijagonalne tstanje 'X)));;broj poena x igraca
+        (O-spojene (+ (prebroj-horizonatalne tstanje 'O) (prebroj-vertikalne tstanje 'O) (prebroj-dijagonalne tstanje 'O)));;broj poena o igraca
 
       )
     
@@ -1261,3 +1263,15 @@
       (t (+ (- X-spojene O-spojene) (prebroj-potencijalne-stanje (vrati-sve-stapice tstanje) 'O))))))
 
 (igraj-connect-four)
+
+
+
+
+
+
+
+
+
+
+
+
