@@ -358,7 +358,7 @@
       (novo-stanje 
           (cond
             (covek (input-potez tstanje igrac))
-            (t (car (minmax tstanje 6 -5000 5000  (not prvi-igrac)))))
+            (t (car (minmax tstanje 7 -5000 5000  (not prvi-igrac)))))
       );;unos poteza
     )
     (potez (if (equalp 'x igrac) 'o 'x) novo-stanje (not covek))
@@ -423,10 +423,7 @@
     )
    )
  
-
-
-
-
+ 
 
 ;(format t "~A" (vrati-moguca-stanja (init-stanje 4) 'X))
 ;(init-stanje 2)
@@ -1162,22 +1159,6 @@
 (defun !ne (a b)
 	(not (equal a b)))
 
-;; 1. Razlika broja poena, tj. ko ima vise spojenih - DONE
-;; 2. Da zakljuci broj mogucih poena, npr. ako ostalo 1 polje nepopunjeno do 4 u nizu 
-;; 3. Da racuna opasnost, tj. kolko protivik ima 3 spojene, ako igrac ima odredjeno npr. da gleda da sabotira nekako njega da dodbije poene
-;; Mozda da svaki od ovih faktora da ima neki prioritet, tj da se mnozi s nekim koeficijentom
-
-
-(setq random-stanje (generisi-random (init-stanje 4) 0 0))
-;(print-glavna random-stnaje)
-
-;; mozda zatreba
-(defun get-matrix-position (stanje i j)
-  (cond
-    ((OR (> i Nstubica) (> j (isqrt Nstubica))) '())
-    (t (nth j (nth i stanje)))
-  )
-)
 
 (defun vrati-horizonatalne-stapice (tstanje) 
   (cond 
@@ -1201,51 +1182,37 @@
   )
 )
 
-(defun prebroj-prazne (lista)
-  (cond 
-    ((null lista) 0)
-    ((equalp '- (car lista)) (1+ (prebroj-prazne (cdr lista))))
-    (t (prebroj-prazne (cdr lista)))))
 
 ;; Vraca broj potencijalnih poena za n-torku
-;; Npr. (x x x -) => 1, jer moguce da dobije samo 1 poen 
-;; (o x x x - -) => 2, jer moguce da dobije jos 2 poena ako spoji jos dva poteza
+;; Npr. (x - - x) => 2, jer moguce da dobije samo 2 poena
+;; Npr. (x x - x) => 1, jer moguce da dobije samo 1 poen 
+;; (o - - x - -) => 4, jer moguce da dobije jos 2 poena ako spoji jos dva poteza
 ;; params
 ;; lista : n-torka
 ;; karakter : igrac
 ;; br : 0
-(defun prebroj-potencijalne (lista karakter br)
+
+(defun prebroj-potencijalne (lista karakter brchar brprazno)
   (cond 
-	;;((and (null lista) (>= br 3)) 1)
-    ((null lista) 0)
-    ((and (equalp br 3) (equalp '- (car lista))) (1+ (prebroj-potencijalne (cdr lista) karakter br)))
-    ((equalp karakter (car lista)) (prebroj-potencijalne (cdr lista) karakter (1+ br)))
-    ((and (equalp (car lista) '-) (equalp (cadr lista) karakter)) (prebroj-potencijalne (cddr lista) karakter (1+ br)))
-    (t (prebroj-potencijalne (cdr lista) karakter 0))))
+    ((null lista) (if (>= (+ brchar brprazno) 4) brprazno 0))
+    ((equalp (car lista) karakter) (prebroj-potencijalne (cdr lista) karakter (1+ brchar) brprazno))
+    ((equalp (car lista) '-) (prebroj-potencijalne (cdr lista) karakter brchar (1+ brprazno)))
+    (t (+ (if (>= (+ brchar brprazno) 4) brprazno 0) (prebroj-potencijalne (cdr lista) karakter 0 0)))))
+
 
 (defun prebroj-potencijalne-stanje (tstanje igrac)
   (cond
     ((null tstanje) 0)
-    (t (+ (prebroj-potencijalne (car tstanje) igrac 0) (prebroj-potencijalne-stanje (cdr tstanje) igrac)))
+    (t (+ (prebroj-potencijalne (car tstanje) igrac 0 0) (prebroj-potencijalne-stanje (cdr tstanje) igrac)))
   )
 )
 
 ;;(prebroj-potencijalne-stanje (vrati-sve-stapice '((x x x -) (- - - -) (- - - -) (- - - -) (x - - -) (- - - -) (- - - -) (- - - -) (x - - -) (- - - -) (- - - -) (- - - -) (- - - -) (- - - -) (- - - -) (- - - -))) 'x)
 
-;; (defun vrati-cinjenicu-za-stapic (stap igrac n)
-;;   (
-;;     (list 
-;;       (prebroj-prazne stap)
-;;       (proveri-potencijalne stap igrac 0)
-
-;;     )
-
-;;   )
-;; )
 
 ;; (defparameter *RULES* 
 ;;  '(
-;;     (if (Vise ?x ) ())
+;;     
 ;;   )
 ;; )
 
@@ -1255,12 +1222,12 @@
      (
         (X-spojene (+ (prebroj-horizonatalne tstanje 'X) (prebroj-vertikalne tstanje 'X) (prebroj-dijagonalne tstanje 'X)));;broj poena x igraca
         (O-spojene (+ (prebroj-horizonatalne tstanje 'O) (prebroj-vertikalne tstanje 'O) (prebroj-dijagonalne tstanje 'O)));;broj poena o igraca
-
+        (X-potencijalne (prebroj-potencijalne-stanje (vrati-sve-stapice tstanje) 'X))
+        (O-potencijalne (prebroj-potencijalne-stanje (vrati-sve-stapice tstanje) 'O))
       )
-    
     (cond 
-      ((equalp igrac 'X) (+ (- O-spojene X-spojene) (prebroj-potencijalne-stanje (vrati-sve-stapice tstanje) 'X)))
-      (t (+ (- X-spojene O-spojene) (prebroj-potencijalne-stanje (vrati-sve-stapice tstanje) 'O))))))
+      ((equalp igrac 'X) (+ (- O-spojene X-spojene) (- O-potencijalne X-potencijalne)))
+      (t (+ (- X-spojene O-spojene) (- X-potencijalne O-potencijalne))))))
 
 (igraj-connect-four)
 
