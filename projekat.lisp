@@ -358,11 +358,7 @@
       (novo-stanje 
           (cond
             (covek (input-potez tstanje igrac))
-<<<<<<< HEAD
             (t (car (minmax tstanje 3 -5000 5000  (not prvi-igrac)))))
-=======
-            (t (car (minmax tstanje 7 -5000 5000  (not prvi-igrac)))))
->>>>>>> c77ec4db29a6d86d19ef153ce7cb038af3bf884c
       );;unos poteza
     )
     (potez (if (equalp 'x igrac) 'o 'x) novo-stanje (not covek))
@@ -1233,21 +1229,6 @@
       ((equalp igrac 'X) (+ (- O-spojene X-spojene) (- O-potencijalne X-potencijalne)))
       (t (+ (- X-spojene O-spojene) (- X-potencijalne O-potencijalne))))))
 
-(igraj-connect-four)
-
-
-
-
-
-
-
-
-
-
-
-
-<<<<<<< HEAD
-
 ;;(igraj-connect-four-human-vs-human) ;;uneti n=4
 ;; Odigraj ovim redosledom: 1,5,F,A,G,M,5,A,F,8,A,9,F,C,F,A,F,A,8
 ;;(setq stanje-4 '( (X X O O)(X O O O)(X X O O)(O O X X)
@@ -1273,5 +1254,3 @@
 
 ;;(igraj-connect-four) ;;Uneti n=4
 ;;Odigraj neke random poteze
-=======
->>>>>>> c77ec4db29a6d86d19ef153ce7cb038af3bf884c
