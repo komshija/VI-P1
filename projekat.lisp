@@ -327,22 +327,22 @@
 ; igrac : x / o
 ; tstanje : trenutno stanje igre
 
-;; (defun potez (igrac tstanje)
-;;   (cond 
-;;     ((krajp tstanje) 
-;;       (let* ()
-;;         (format t "~%Kraj igre.. Racunam pobednika..~%")
-;;         (vrati-pobednika tstanje))) ;; testira na kraj, => raucna pobednika ako je kraj
+ (defun potez-human-vs-human (igrac tstanje)
+   (cond 
+     ((krajp tstanje) 
+       (let* ()
+         (format t "~%Kraj igre.. Racunam pobednika..~%")
+         (vrati-pobednika tstanje))) ;; testira na kraj, => raucna pobednika ako je kraj
     
-;;     (t (let* (
-;;       (temp (print-glavna tstanje)) ;;stampa
-;;       (odigran-stubic (progn (format t "~%Unesite stubic koji hocete da odigrate [ ~A ] :" igrac ) (convert-broj-stubica (char-upcase (read-char)))));;unos poteza
-;;     )
-;;     (clear-input);; clearuje input, kad zove read-char unese i slovo + \n, i onda se desava da stampa dva puta..
-;;     (cond 
-;;       ((validanp tstanje odigran-stubic)  (potez (if (equalp igrac 'x) 'o 'x) (odigraj tstanje igrac odigran-stubic)));; igra sledeci
-;;       (t (potez igrac tstanje))))));; igra opet, potez nevalidan
-;; )
+     (t (let* (
+       (temp (print-glavna tstanje)) ;;stampa
+       (odigran-stubic (progn (format t "~%Unesite stubic koji hocete da odigrate [ ~A ] :" igrac ) (convert-broj-stubica (char-upcase (read-char)))));;unos poteza
+     )
+     (clear-input);; clearuje input, kad zove read-char unese i slovo + \n, i onda se desava da stampa dva puta..
+     (cond 
+       ((validanp tstanje odigran-stubic)  (potez-human-vs-human (if (equalp igrac 'x) 'o 'x) (odigraj tstanje igrac odigran-stubic)));; igra sledeci
+       (t (potez-human-vs-human igrac tstanje))))));; igra opet, potez nevalidan
+ )
 
 ;;Petlja u kojoj se igra protiv AI
 
@@ -358,7 +358,7 @@
       (novo-stanje 
           (cond
             (covek (input-potez tstanje igrac))
-            (t (car (minmax tstanje 8 -5000 5000  (not prvi-igrac)))))
+            (t (car (minmax tstanje 3 -5000 5000  (not prvi-igrac)))))
       );;unos poteza
     )
     (potez (if (equalp 'x igrac) 'o 'x) novo-stanje (not covek))
@@ -381,9 +381,9 @@
 ;Params
 ;
 
-;; (defun igraj-connect-four () 
-;;   (let* ((tstanje (start-igra)))
-;;     (potez 'x tstanje)))
+ (defun igraj-connect-four-human-vs-human () 
+   (let* ((tstanje (start-igra)))
+     (potez-human-vs-human 'x tstanje)))
 
 ;;Funkcija u kojoj se pokrece igra za igru protiv AI
 
@@ -1260,4 +1260,29 @@
       ((equalp igrac 'X) (+ (- O-spojene X-spojene) (prebroj-potencijalne-stanje (vrati-sve-stapice tstanje) 'X)))
       (t (+ (- X-spojene O-spojene) (prebroj-potencijalne-stanje (vrati-sve-stapice tstanje) 'O))))))
 
-(igraj-connect-four)
+
+;;(igraj-connect-four-human-vs-human) ;;uneti n=4
+;; Odigraj ovim redosledom: 1,5,F,A,G,M,5,A,F,8,A,9,F,C,F,A,F,A,8
+;;(setq stanje-4 '( (X X O O)(X O O O)(X X O O)(O O X X)
+;;                    (X O O O)(O X X X)(O X X O)(O O O X)
+;;                    (X X X O)(X O O X)(X O X O)(O X O O)
+;;                    (X O X O)(X X X O)(X O O X)(O X O X)))
+;;(print-glavna stanje-4)
+;;(+ (prebroj-horizonatalne stanje-4 'X) (prebroj-vertikalne stanje-4 'X) (prebroj-dijagonalne stanje-4 'X))
+;;(+ (prebroj-horizonatalne stanje-4 'O) (prebroj-vertikalne stanje-4 'O) (prebroj-dijagonalne stanje-4 'O))
+
+;;(igraj-connect-four-human-vs-human) ;;uneti n=6
+;;odigraj ovim redosledom: 2,9,N,G,AB,MN,9,G,N,4,G,A,N,M,N,G,N,G,4
+;;(setq stanje-6 '( (X O X O X O)(O X X O O X)(X O O O X O)(O X O O O X)(O O X X O X)(O O O X O X)
+;;                  (X O X O O X)(O X O X X O)(X O X O O O)(O X O X O O)(O O X X X O)(O O O X X O)
+;;                  (X O O X X O)(X X X O X O)(X X O X O X)(X X O X O O)(X X X X O O)(X O X O X O)
+;;                  (O X X O X O)(X O X X X O)(O X X X O X)(X X O O X O)(X X X O X O)(O X O X O X)
+;;                  (O X O X O X)(X O X O X X)(O X O X X X)(X X O O O X)(X X X O O X)(X X O O X O)
+;;                  (X O O X O X)(O O X O X O)(O O O X O X)(O O X O X X)(O O O O X X)(O O X X O X)
+;;                  )
+;;(print-glavna stanje-6)
+;;(+ (prebroj-horizonatalne stanje-6 'X) (prebroj-vertikalne stanje-6 'X) (prebroj-dijagonalne stanje-6 'X))
+;;(+ (prebroj-horizonatalne stanje-6 'O) (prebroj-vertikalne stanje-6 'O) (prebroj-dijagonalne stanje-6 'O))
+
+;;(igraj-connect-four) ;;Uneti n=4
+;;Odigraj neke random poteze
